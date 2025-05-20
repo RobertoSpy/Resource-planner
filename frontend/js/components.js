@@ -6,7 +6,7 @@ export function afiseazaProduse(selector, produse) {
     const prodDiv = document.createElement('div');
     prodDiv.classList.add('produs-card');
     prodDiv.innerHTML = `
-      <img src="/frontend/images/${p.img}" alt="${p.nume}" />
+      <img src="public/images/${p.img}" alt="${p.nume}" />
       <h3>${p.nume}</h3>
       <p>Preț: ${p.pret} RON</p>
       <p>Stoc: ${p.stoc}</p>

@@ -17,7 +17,7 @@ export function loadDashboard() {
   `;
 
   const lowPrice = produseLowPrice.slice(0, 50);
-  const almostEmpty = produseLowStock.filter(p => p.stoc < 50).slice(0, 5);
+  const almostEmpty = produseLowStock.filter(p => p.stoc < 50).slice(0, 10);
 
   afiseazaProduse('#lowPrice', lowPrice);
   afiseazaProduse('#almostEmpty', almostEmpty);

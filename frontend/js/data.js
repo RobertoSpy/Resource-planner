@@ -6,15 +6,15 @@ export const categorii = [
 
 export const produseLowPrice = [
   { id: 101, nume: 'Căști', pret: 50, stoc: 100, categorieId: 1, img: 'poza mea1.jpeg' },
+  { id: 102, nume: 'Mouse', pret: 70, stoc: 80, categorieId: 2, img: 'poza mea1.jpeg' },
+  { id: 103, nume: 'Tricou', pret: 30, stoc: 50, categorieId: 3, img: 'poza mea1.jpeg' },
+  { id: 104, nume: 'Carte SF', pret: 40, stoc: 60, categorieId: 1, img: 'poza mea1.jpeg' },
+  { id: 105, nume: 'Șapcă', pret: 20, stoc: 90, categorieId: 2, img: 'poza mea1.jpeg' },
+  { id: 101, nume: 'Căști', pret: 50, stoc: 100, categorieId: 3, img: 'poza mea1.jpeg' },
   { id: 102, nume: 'Mouse', pret: 70, stoc: 80, categorieId: 1, img: 'poza mea1.jpeg' },
   { id: 103, nume: 'Tricou', pret: 30, stoc: 50, categorieId: 2, img: 'poza mea1.jpeg' },
   { id: 104, nume: 'Carte SF', pret: 40, stoc: 60, categorieId: 3, img: 'poza mea1.jpeg' },
-  { id: 105, nume: 'Șapcă', pret: 20, stoc: 90, categorieId: 2, img: 'poza mea1.jpeg' },
-  { id: 101, nume: 'Căști', pret: 50, stoc: 100, categorieId: 1, img: 'poza mea1.jpeg' },
-  { id: 102, nume: 'Mouse', pret: 70, stoc: 80, categorieId: 1, img: 'poza mea1.jpeg' },
-  { id: 103, nume: 'Tricou', pret: 30, stoc: 50, categorieId: 2, img: 'poza mea1.jpeg' },
-  { id: 104, nume: 'Carte SF', pret: 40, stoc: 60, categorieId: 3, img: 'poza mea1.jpeg' },
-  { id: 105, nume: 'Șapcă', pret: 20, stoc: 90, categorieId: 2, img: 'poza mea1.jpeg' },
+  { id: 105, nume: 'Șapcă', pret: 20, stoc: 90, categorieId: 1, img: 'poza mea1.jpeg' },
 ];
 
 export const produseLowStock = [
