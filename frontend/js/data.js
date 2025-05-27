@@ -24,3 +24,6 @@ export const produseLowStock = [
   { id: 204, nume: 'Telefon', pret: 2000, stoc: 1, categorieId: 1, img: 'poza mea1.jpeg' },
   { id: 205, nume: 'Geacă', pret: 300, stoc: 0, categorieId: 2, img: 'poza mea1.jpeg' },
 ];
+
+
+//CRUD cu baza de date pe viitor

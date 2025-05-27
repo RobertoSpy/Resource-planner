@@ -171,4 +171,90 @@ section h2 {
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
+.notificari-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.notificari-table th,
+.notificari-table td {
+  padding: 10px;
+  text-align: center;
+  border: 1px solid #ccc;
+}
+
+.verificare-btn {
+  background-color: #002D62;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 5px;
+}
+
+.utilizatori-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.utilizatori-table th,
+.utilizatori-table td {
+  padding: 10px;
+  text-align: center;
+  border: 1px solid #ccc;
+}
+
+.utilizatori-controls {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.btn-albastru {
+  background-color: #002D62;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.filtru-dropdown {
+  position: relative;
+}
+
+.filtru-meniu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  border: 1px solid #ccc;
+  z-index: 10;
+}
+
+.filtru-meniu div {
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.filtru-meniu div:hover {
+  background-color: #eee;
+}
+
+.edit-btn {
+  background-color: #003366;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  margin-right: 5px;
+}
+
+.delete-btn {
+  background-color: #e53935;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+}
+
 
