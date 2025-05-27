@@ -1,6 +1,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const {testConnection} = require('./db');
 
 const mimeTypes = {
   '.html': 'text/html',
@@ -39,6 +40,8 @@ const server = http.createServer((req, res) => {
 });
 
 const PORT = 3000;
-server.listen(PORT, () => {
-  console.log(`Server pornește pe http://localhost:${PORT}`);
+server.listen(3000, '0.0.0.0', () => {
+  console.log('Backend rulează pe http://0.0.0.0:3000');
 });
+
+testConnection();
