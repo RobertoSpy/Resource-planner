@@ -1,4 +1,4 @@
-version: '3.8'
+
 
 services:
   backend:
@@ -14,6 +14,7 @@ services:
       DB_HOST: postgres
       DB_PORT: 5432
       DB_NAME: mydatabase
+      JWT_SECRET: supersecretjwt
 
   frontend:
     build: ./frontend
@@ -34,6 +35,7 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./bazadate.sql:/docker-entrypoint-initdb.d/init.sql
 
 volumes:
   pgdata:

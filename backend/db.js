@@ -1,6 +1,7 @@
 const { Pool } = require('pg');
 
 const pool = new Pool({
+
   user: 'postgres',         // <-- cu ghilimele
   password: 'WEB',          // <-- cu ghilimele (sau folosește process.env.WEB dacă e din env)
   host: 'my-postgres',        // <-- cu ghilimele
@@ -23,5 +24,6 @@ async function testConnection(retries = 10, delay = 3000) {
   console.error('❌ Nu s-a putut realiza conexiunea la PostgreSQL.');
   process.exit(1);
 }
+
 
 module.exports = { pool, testConnection };
