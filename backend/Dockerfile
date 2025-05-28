@@ -1,5 +1,13 @@
 FROM node:18
+
 WORKDIR /app
+
+# Copiază doar fișierele package.json și package-lock.json
+COPY package*.json ./
+RUN npm install
+
+# Copiază toate fișierele din directorul backend în container
 COPY . .
-EXPOSE 3000
+
+# Rulează aplicația
 CMD ["node", "server.js"]

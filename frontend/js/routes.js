@@ -41,6 +41,114 @@ export function loadStocuri() {
     afiseazaProduse('#produse', produseFiltrate);
   });
 }
+// Exemplu static de date utilizatori (poți înlocui cu date dinamice)
+const utilizatori = [
+  { nume: 'SPIRIDON ROBERTO', id: '27372727', rol: 'ADMINISTRATOR' },
+  { nume: 'COCEA IUSTIN', id: '27372727', rol: 'ANGAJAT' }
+];
+
+// Funcție pentru pagina de utilizatori
+export function loadUtilizatori() {
+  const content = document.getElementById('content');
+  content.innerHTML = `
+    <h1>Utilizatori</h1>
+    <div class="utilizatori-controls">
+      <button class="btn-albastru">Adauga utilizator nou</button>
+      <div class="filtru-dropdown">
+        <button class="btn-albastru" id="filtreaza-btn">Filtreaza utilizator</button>
+        <div class="filtru-meniu" id="filtru-meniu" style="display:none;">
+          <div data-rol="ADMINISTRATOR">ADMINISTRATOR</div>
+          <div data-rol="ANGAJAT">ANGAJAT</div>
+        </div>
+      </div>
+    </div>
+    <table class="utilizatori-table">
+      <thead>
+        <tr>
+          <th>NUME</th>
+          <th>ID</th>
+          <th>ROL</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="utilizatori-body"></tbody>
+    </table>
+  `;
+
+  const tbody = document.getElementById('utilizatori-body');
+
+  function afiseazaUtilizatori(lista) {
+    tbody.innerHTML = '';
+    lista.forEach(u => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${u.nume}</td>
+        <td>${u.id}</td>
+        <td>${u.rol}</td>
+        <td>
+          <button class="edit-btn"><i class="fa fa-edit"></i></button>
+          <button class="delete-btn">ELIMINARE</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  afiseazaUtilizatori(utilizatori);
+
+  // Dropdown filtre
+  const filtruBtn = document.getElementById('filtreaza-btn');
+  const filtruMeniu = document.getElementById('filtru-meniu');
+  filtruBtn.addEventListener('click', () => {
+    filtruMeniu.style.display = filtruMeniu.style.display === 'none' ? 'block' : 'none';
+  });
+
+  filtruMeniu.querySelectorAll('div').forEach(option => {
+    option.addEventListener('click', () => {
+      const rol = option.dataset.rol;
+      const filtrati = utilizatori.filter(u => u.rol === rol);
+      afiseazaUtilizatori(filtrati);
+      filtruMeniu.style.display = 'none';
+    });
+  });
+}
+
+// Funcție pentru Notificări
+export function loadNotificari() {
+  const content = document.getElementById('content');
+  content.innerHTML = `
+    <h1>Notificari</h1>
+    <table class="notificari-table">
+      <thead>
+        <tr>
+          <th>PRODUS</th>
+          <th>ID</th>
+          <th>STOC</th>
+          <th>VERIFICARE</th>
+        </tr>
+      </thead>
+      <tbody id="notificari-body"></tbody>
+    </table>
+  `;
+
+  const toateProdusele = [...produseLowStock, ...produseLowPrice];
+  const produseUnice = toateProdusele.filter((p, index, self) =>
+    index === self.findIndex((x) => x.id === p.id)
+  );
+
+  const tbody = document.getElementById('notificari-body');
+  produseUnice.forEach(p => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${p.nume}</td>
+      <td>${p.id}</td>
+      <td>${p.stoc}</td>
+      <td><button class="verificare-btn">${p.stoc === 0 ? 'DA' : 'NU'}</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
 
 // Setup sidebar și routing
 export function setupRouting() {
@@ -68,11 +176,11 @@ export function setupRouting() {
     setActiveButton('btn-stocuri');
   } else if (path === '/dashboard/utilizatori') {
     // aici ar trebui să ai o funcție loadUtilizatori()
-    document.getElementById('content').innerHTML = `<h1>Utilizatori (în construcție)</h1>`;
+    loadUtilizatori();
     setActiveButton('btn-utilizatori');
   } else if (path === '/dashboard/notificari') {
     // la fel, loadNotificari()
-    document.getElementById('content').innerHTML = `<h1>Notificări (în construcție)</h1>`;
+    loadNotificari();
     setActiveButton('btn-notificari');
   } else {
     history.replaceState({ path: '/dashboard' }, '', '/dashboard');
