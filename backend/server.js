@@ -15,6 +15,18 @@ const verifyToken = require('./verifyToken')
 require('dotenv').config()
 
 
+const mimeTypes = {
+  '.html': 'text/html',
+  '.js': 'application/javascript',
+  '.css': 'text/css',
+  '.json': 'application/json',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon',
+}
+
+
 const server = http.createServer(async (req, res) => {
   
   if (req.url === '/protected' && req.method === 'GET') {

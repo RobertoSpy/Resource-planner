@@ -15,6 +15,14 @@ CREATE TABLE articol (
     CONSTRAINT fk_categorie FOREIGN KEY (categorie_id) REFERENCES categorie(id)
 );
 
+CREATE TABLE stoc (
+    id_stoc SERIAL PRIMARY KEY,
+    id_articol INTEGER REFERENCES articol(id_articol),
+    id_utilizator INTEGER REFERENCES utilizator(id_utilizator),
+    cantitate INTEGER NOT NULL,
+    prag_alerta INTEGER NOT NULL
+);
+
 CREATE TABLE utilizator (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
