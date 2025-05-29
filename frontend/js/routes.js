@@ -41,7 +41,7 @@ export function loadStocuri() {
     afiseazaProduse('#produse', produseFiltrate);
   });
 }
-// Exemplu static de date utilizatori (poți înlocui cu date dinamice)
+
 const utilizatori = [
   { nume: 'SPIRIDON ROBERTO', id: '27372727', rol: 'ADMINISTRATOR' },
   { nume: 'COCEA IUSTIN', id: '27372727', rol: 'ANGAJAT' }
@@ -175,11 +175,11 @@ export function setupRouting() {
     loadStocuri();
     setActiveButton('btn-stocuri');
   } else if (path === '/dashboard/utilizatori') {
-    // aici ar trebui să ai o funcție loadUtilizatori()
+    
     loadUtilizatori();
     setActiveButton('btn-utilizatori');
   } else if (path === '/dashboard/notificari') {
-    // la fel, loadNotificari()
+    
     loadNotificari();
     setActiveButton('btn-notificari');
   } else {
@@ -212,6 +212,6 @@ document.getElementById('btn-notificari').addEventListener('click', () => naviga
     }
   });
 
-  // La încărcare pagină: setează pagina corectă în funcție de URL
+  
   renderRoute(location.pathname);
 }

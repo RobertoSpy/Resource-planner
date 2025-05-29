@@ -7,8 +7,8 @@ bcrypt.compare(parolaIntroduse, hashStocat, (err, result) => {
   if (err) {
     console.error('Eroare:', err);
   } else if (result) {
-    console.log('✅ Parola este corectă!');
+    console.log('Parola este corectă!');
   } else {
-    console.log('❌ Parola este greșită!');
+    console.log('Parola este greșită!');
   }
 });

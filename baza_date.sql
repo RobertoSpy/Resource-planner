@@ -11,6 +11,7 @@ CREATE TABLE articol (
     nume VARCHAR(150) NOT NULL,
     cantitate INTEGER NOT NULL CHECK (cantitate >= 0),
     categorie_id INTEGER NOT NULL,
+    pret NUMBER(10, 2),
     CONSTRAINT fk_categorie FOREIGN KEY (categorie_id) REFERENCES categorie(id)
 );
 
@@ -20,13 +21,6 @@ CREATE TABLE utilizator (
     nume VARCHAR(100) NOT NULL
 );
 
-CREATE TABLE stoc (
-    id_stoc SERIAL PRIMARY KEY,
-    id_articol INTEGER REFERENCES articol(id_articol),
-    id_utilizator INTEGER REFERENCES utilizator(id_utilizator),
-    cantitate INTEGER NOT NULL,
-    prag_alerta INTEGER NOT NULL
-);
 
 CREATE TABLE notificare (
     id SERIAL PRIMARY KEY,
@@ -47,13 +41,13 @@ INSERT INTO categorie (nume) VALUES
 ('Cosmetice');
 
 
-INSERT INTO articol (nume, cantitate, categorie_id) VALUES
-('Bec incandescent', 15, 1),
-('Lemn pentru foc', 5, 1),
-('Toner imprimanta', 2, 2),
-('Crema hidratanta', 20, 4);
+INSERT INTO articol (nume, cantitate, categorie_id, pret) VALUES
+('Bec incandescent', 15, 1, 10),
+('Lemn pentru foc', 5, 1, 20),
+('Toner imprimanta', 2, 2, 120),
+('Crema hidratanta', 20, 4, 5);
 
--- Populare utilizatori exemplu
+
 INSERT INTO utilizator (email, nume) VALUES
 ('ion.popescu@example.com', 'Ion Popescu'),
 ('maria.ionescu@example.com', 'Maria Ionescu');
@@ -83,6 +77,12 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_notificare_stoc
+AFTER INSERT OR UPDATE ON articol
+FOR EACH ROW
+EXECUTE FUNCTION trigger_notificare_stoc();
+
 
 -- Trigger: la adăugare articol, verifică să nu fie duplicat
 CREATE OR REPLACE FUNCTION trigger_verifica_dublura_articol() RETURNS TRIGGER AS $$

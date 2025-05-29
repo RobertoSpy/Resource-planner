@@ -2,7 +2,6 @@ const { pool } = require('../db');
 
 async function getArticole(req, res) {
   try {
-    // Poate vrem și să vedem și numele categoriei alături de articol
     const query = `
       SELECT articol.*, categorie.nume AS categorie_nume
       FROM articol
@@ -21,7 +20,7 @@ async function getArticole(req, res) {
 async function addArticol(req, res, body) {
   try {
     const { nume, cantitate, categorie_id } = JSON.parse(body);
-    // validare simplă:
+    
     if (!nume || cantitate == null || categorie_id == null) {
       res.writeHead(400);
       return res.end('Date incomplete pentru articol');

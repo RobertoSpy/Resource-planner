@@ -15,19 +15,8 @@ const verifyToken = require('./verifyToken')
 require('dotenv').config()
 
 
-const mimeTypes = {
-  '.html': 'text/html',
-  '.js': 'application/javascript',
-  '.css': 'text/css',
-  '.json': 'application/json',
-  '.png': 'image/png',
-  '.jpg': 'image/jpeg',
-  '.svg': 'image/svg+xml',
-  '.ico': 'image/x-icon',
-}
-
 const server = http.createServer(async (req, res) => {
-  // ✅ Mutat aici!
+  
   if (req.url === '/protected' && req.method === 'GET') {
     verifyToken(req, res, () => {
       res.writeHead(200, { 'Content-Type': 'application/json' })
@@ -82,7 +71,7 @@ const server = http.createServer(async (req, res) => {
       } else if (req.url === '/api/articole/low-stock') {
         getArticoleLowStock(req, res);
       } else if (idMatch) {
-        // eventual get după id, dacă ai implementat
+        // eventual get după id
       } else {
         res.writeHead(404);
         res.end('Not found');
@@ -123,10 +112,6 @@ const server = http.createServer(async (req, res) => {
     return;
   }
     
-
-
-  // Servire fișiere statice
-
   fs.readFile(filePath, (err, content) => {
     if (err) {
       if (err.code === 'ENOENT') {
@@ -149,9 +134,9 @@ const PORT = 3000;
 
 testConnection().then(() => {
   server.listen(PORT, '0.0.0.0', () => {
-    console.log(`✅ Backend rulează pe http://0.0.0.0:${PORT}`);
+    console.log(`Backend rulează pe http://0.0.0.0:${PORT}`);
   });
 }).catch((err) => {
-  console.error('❌ Eroare la conexiunea cu baza de date:', err);
+  console.error("Eroare la conexiunea cu baza de date:', err");
   process.exit(1);
 });

@@ -1,4 +1,4 @@
-// backend/routes/utilizatori.js
+
 const { pool } = require('../db');
 
 async function getUtilizatori(req, res) {
