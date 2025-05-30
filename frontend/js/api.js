@@ -5,6 +5,12 @@ export async function fetchCategorii() {
   return await res.json();
 }
 
+export async function fetchArticole() {
+  const res = await fetch('/api/articole');
+  if (!res.ok) throw new Error('Eroare la încărcarea categoriilor');
+  return await res.json();
+}
+
 export async function adaugaCategorie(categorie) {
   const res = await fetch('/api/categorie', {
     method: 'POST',
@@ -34,8 +40,22 @@ export async function stergeCategorie(id) {
 }
 
 export async function fetchArticoleLowStock() {
-  const res = await fetch('/api/articole/lowstock');
+  const res = await fetch('/api/articole/low-stock');
   if (!res.ok) throw new Error('Eroare la încărcarea produselor cu stoc mic');
+  const data = await res.json();
+  console.log('LOW STOCK:', data); 
+  return data;
+}
+
+
+export async function fetchArticoleLowPrice() {
+  const res = await fetch('/api/articole/low-price');
+  if (!res.ok) {
+    const text = await res.text();
+    console.error('Răspuns server:', res.status, text);
+    throw new Error(`Eroare la încărcarea produselor ieftine: ${res.status}`);
+  }
   return await res.json();
 }
+
 

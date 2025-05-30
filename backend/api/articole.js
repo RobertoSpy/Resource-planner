@@ -82,7 +82,7 @@ async function deleteArticol(req, res, id) {
 
 async function getArticoleLowStock(req, res) {
   try {
-    const result = await pool.query('SELECT * FROM verifica_stocuri($1)', [5]);
+    const result = await pool.query('SELECT * FROM verifica_stocuri()');
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(result.rows));
   } catch (err) {
@@ -91,10 +91,28 @@ async function getArticoleLowStock(req, res) {
   }
 }
 
+async function getArticoleLowPrice(req, res) {
+  try {
+    const result = await pool.query(`
+      SELECT * FROM articol
+      WHERE pret < 100
+      ORDER BY pret ASC
+      LIMIT 5
+    `);
+
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(result.rows));
+  } catch (err) {
+    res.writeHead(500, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Eroare la interogarea articolelor ieftine' }));
+  }
+}
+
 module.exports = {
   getArticole,
   addArticol,
   updateArticol,
   deleteArticol,
-  getArticoleLowStock
+  getArticoleLowStock,
+  getArticoleLowPrice,
 };

@@ -67,12 +67,17 @@ INSERT INTO stoc(id_articol, id_utilizator, cantitate, prag_alerta) VALUES
 
 -- Functie PL/pgSQL care returneaza articole cu cantitate sub un prag
 CREATE OR REPLACE FUNCTION verifica_stocuri(prag INTEGER DEFAULT 5)
-RETURNS TABLE(id INTEGER, nume VARCHAR, cantitate INTEGER) AS $$
+RETURNS TABLE(id INTEGER, nume VARCHAR, cantitate INTEGER, pret NUMERIC) AS $$
 BEGIN
     RETURN QUERY
-    SELECT id, nume, cantitate FROM articol WHERE cantitate < prag;
+    SELECT articol.id, articol.nume, articol.cantitate, articol.pret
+    FROM articol
+    WHERE articol.cantitate < prag;
 END;
 $$ LANGUAGE plpgsql;
+
+
+
 
 
 CREATE OR REPLACE FUNCTION trigger_notificare_stoc()

@@ -1,19 +1,22 @@
 export function afiseazaProduse(selector, produse) {
   const container = document.querySelector(selector);
-  container.innerHTML = '';
 
-  produse.forEach(p => {
-    const prodDiv = document.createElement('div');
-    prodDiv.classList.add('produs-card');
-    prodDiv.innerHTML = `
-      <img src="public/images/${p.img}" alt="${p.nume}" />
+  if (!Array.isArray(produse)) {
+    container.innerHTML = `<p style="color:red;">Eroare la afișarea produselor.</p>`;
+    console.error('afiseazaProduse: Nu s-a primit un array', produse);
+    return;
+  }
+  container.innerHTML = produse.map(p => `
+    <div class="produs-card">
+      <img src="${p.imagine || 'placeholder.jpg'}" alt="${p.nume}" />
       <h3>${p.nume}</h3>
-      <p>Preț: ${p.pret} RON</p>
-      <p>Stoc: ${p.stoc}</p>
-    `;
-    container.appendChild(prodDiv);
-  });
+      <p>Pret: ${p.pret} lei</p>
+      <p>Stoc: ${p.cantitate}</p> 
+    </div>
+  `).join('');
 }
+
+
 
 export function afiseazaCategorii(selector, categorii, onClick) {
   const container = document.querySelector(selector);

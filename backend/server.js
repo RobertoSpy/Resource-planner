@@ -7,7 +7,7 @@ const { testConnection } = require('./db');
 // Import funcții API
 const { getUtilizatori, addUtilizator, updateUtilizator, deleteUtilizator } = require('./api/utilizatori');
 
-const { getArticole, addArticol, updateArticol, deleteArticol, getArticoleLowStock } = require('./api/articole');
+const { getArticole, addArticol, updateArticol, deleteArticol, getArticoleLowStock, getArticoleLowPrice } = require('./api/articole');
 const { getCategorie, addCategorie, updateCategorie, deleteCategorie } = require('./api/categorie');
 
 // Import funcții pentru autentificare
@@ -78,8 +78,8 @@ const server = http.createServer(async (req, res) => {
           getArticole(req, res);
         } else if (req.url === '/api/articole/low-stock') {
           getArticoleLowStock(req, res);
-        } else if (idMatch) {
-          // eventual get după id, dacă ai implementat
+        } else if (req.url === '/api/articole/low-price') {
+          getArticoleLowPrice(req, res);
         } else {
           res.writeHead(404);
           res.end('Not found');
@@ -126,82 +126,6 @@ const server = http.createServer(async (req, res) => {
   let contentType = mimeTypes[ext] || 'text/plain';
 
 
-  // Rute API pentru utilizatori
-  if (req.url.startsWith('/api/utilizatori')) {
-    let body = '';
-    req.on('data', chunk => (body += chunk));
-    req.on('end', () => {
-      const idMatch = req.url.match(/^\/api\/utilizatori\/(\d+)/);
-      if (req.method === 'GET' && req.url === '/api/utilizatori') {
-        getUtilizatori(req, res);
-      } else if (req.method === 'POST') {
-        addUtilizator(req, res, body);
-      } else if (req.method === 'PUT' && idMatch) {
-        updateUtilizator(req, res, idMatch[1], body);
-      } else if (req.method === 'DELETE' && idMatch) {
-        deleteUtilizator(req, res, idMatch[1]);
-      } else {
-        res.writeHead(404);
-        res.end('Not found');
-      }
-    });
-    return;
-  }
-
-  // Rute API pentru articole
- if (req.url.startsWith('/api/articole')) {
-  let body = '';
-  req.on('data', chunk => (body += chunk));
-  req.on('end', () => {
-    const idMatch = req.url.match(/^\/api\/articole\/(\d+)/);
-
-    if (req.method === 'GET') {
-      if (req.url === '/api/articole') {
-        getArticole(req, res);
-      } else if (req.url === '/api/articole/low-stock') {
-        getArticoleLowStock(req, res);
-      } else if (idMatch) {
-        // eventual get după id
-      } else {
-        res.writeHead(404);
-        res.end('Not found');
-      }
-    } else if (req.method === 'POST') {
-      addArticol(req, res, body);
-    } else if (req.method === 'PUT' && idMatch) {
-      updateArticol(req, res, idMatch[1], body);
-    } else if (req.method === 'DELETE' && idMatch) {
-      deleteArticol(req, res, idMatch[1]);
-    } else {
-      res.writeHead(404);
-      res.end('Not found');
-    }
-  });
-  return;
-}
-
-// Rute API pentru categorii
-  if (req.url.startsWith('/api/categorie')) {
-    let body = '';
-    req.on('data', chunk => (body += chunk));
-    req.on('end', () => {
-      const idMatch = req.url.match(/^\/api\/categorie\/(\d+)/);
-      if (req.method === 'GET' && req.url === '/api/categorie') {
-        getCategorie(req, res);
-      } else if (req.method === 'POST') {
-        addCategorie(req, res, body);
-      } else if (req.method === 'PUT' && idMatch) {
-        updateCategorie(req, res, idMatch[1], body);
-      } else if (req.method === 'DELETE' && idMatch) {
-        deleteCategorie(req, res, idMatch[1]);
-      } else {
-        res.writeHead(404);
-        res.end('Not found');
-      }
-    });
-    return;
-  }
-    
   fs.readFile(filePath, (err, content) => {
     if (err) {
       if (err.code === 'ENOENT') {

@@ -1,8 +1,11 @@
 import { categorii, produseLowStock, produseLowPrice } from './data.js';
 import { afiseazaProduse, afiseazaCategorii } from './components.js';
 
-// Funcție pentru Dashboard
-export function loadDashboard() {
+
+import { fetchArticoleLowStock, fetchArticoleLowPrice, fetchCategorii, fetchArticole } from './api.js';
+
+// Funcția loadDashboard 
+export async function loadDashboard() {
   const content = document.getElementById('content');
   content.innerHTML = `
     <h1>Dashboard</h1>
@@ -16,30 +19,41 @@ export function loadDashboard() {
     </section>
   `;
 
-  const lowPrice = produseLowPrice.slice(0, 50);
-  const almostEmpty = produseLowStock.filter(p => p.stoc < 50).slice(0, 10);
+  
+   const produseLowPrice = await fetchArticoleLowPrice();
 
-  afiseazaProduse('#lowPrice', lowPrice);
-  afiseazaProduse('#almostEmpty', almostEmpty);
+  const produseLowStock = await fetchArticoleLowStock();
+
+  afiseazaProduse('#almostEmpty', produseLowStock.slice(0, 10));
+  afiseazaProduse('#lowPrice', produseLowPrice.slice(0, 10));
 }
 
+
 // Funcție pentru Stocuri
-export function loadStocuri() {
-  const content = document.getElementById('content');
-  content.innerHTML = `
-    <h1>Categorii Produse</h1>
-    <div class="scroll-container" id="categorii"></div>
-    <div id="produse-categorie"></div>
-  `;
+export async function loadStocuri() {
+  try {
+    const categorii = await fetchCategorii();
+    const articole = await fetchArticole();
 
-  afiseazaCategorii('#categorii', categorii, (categorie) => {
-    const toateProdusele = [...produseLowStock, ...produseLowPrice];
-    const produseFiltrate = toateProdusele.filter(p => p.categorieId === categorie.id);
+    const content = document.getElementById('content');
+    content.innerHTML = `
+      <h1>Categorii Produse</h1>
+      <div class="scroll-container" id="categorii"></div>
+      <div id="produse-categorie"></div>
+    `;
 
-    const produseContainer = document.getElementById('produse-categorie');
-    produseContainer.innerHTML = `<h2>Produse în categoria: ${categorie.nume}</h2><div class="scroll-container" id="produse"></div>`;
-    afiseazaProduse('#produse', produseFiltrate);
-  });
+    afiseazaCategorii('#categorii', categorii, (categorie) => {
+      const produseFiltrate = articole.filter(p => p.categorie_id === categorie.id);
+      const produseContainer = document.getElementById('produse-categorie');
+      produseContainer.innerHTML = `<h2>Produse în categoria: ${categorie.nume}</h2><div class="scroll-container" id="produse"></div>`;
+      afiseazaProduse('#produse', produseFiltrate);
+    });
+
+  } catch (error) {
+    console.error('Eroare la încărcarea datelor pentru stocuri:', error);
+    const content = document.getElementById('content');
+    content.innerHTML = `<p style="color:red;">${error.message}</p>`;
+  }
 }
 
 const utilizatori = [
