@@ -11,7 +11,7 @@ const pool = new Pool({
 
 });
 
-
+  
 async function testConnection(retries = 10, delay = 3000) {
   for (let i = 0; i < retries; i++) {
     try {
@@ -29,5 +29,22 @@ async function testConnection(retries = 10, delay = 3000) {
   process.exit(1);
 }
 
+async function getUserById(id) {
+  try {
+    console.log('ID primit pentru interogare:', id); // Log pentru ID-ul primit
+    const query = 'SELECT id, email, rol FROM utilizator WHERE id = $1';
+    const result = await pool.query(query, [id]);
+    console.log('Rezultatul interogării:', result.rows); // Log pentru rezultatul interogării
 
-module.exports = { pool, testConnection };
+    if (result.rows.length === 0) {
+      return null; // Utilizatorul nu a fost găsit
+    }
+
+    return result.rows[0]; // Returnează utilizatorul
+  } catch (err) {
+    console.error('Eroare la interogarea utilizatorului:', err.message);
+    throw err;
+  }
+}
+
+module.exports = { pool, testConnection, getUserById };

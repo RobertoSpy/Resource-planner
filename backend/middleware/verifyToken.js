@@ -1,30 +1,30 @@
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
-// verifică dacă cererea HTTP conține un token JWT
 function verifyToken(req, res, callback) {
-  // extrage antetul Authorization din cererea HTTP
-  const authHeader = req.headers['authorization']
-  const token = authHeader && authHeader.split(' ')[1]
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
 
-  // dacă token este null sau undefined, returnează un răspuns HTTP cu codul de stare 401
   if (!token) {
-    res.writeHead(401, { 'Content-Type': 'application/json' })
-    res.end(JSON.stringify({ err: 'token lipsă' }))
-    return
+    res.writeHead(401, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Token lipsă' }));
+    return;
   }
 
-  // jwt.verify verifica dacă token-ul JWT este valid
+  console.log('JWT_SECRET utilizat pentru verificare:', process.env.JWT_SECRET);
+  console.log('Token primit:', token);
+
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-   // dacă token-ul este invalid returnează un răspuns HTTP cu codul de stare 403 și un mesaj JSON
     if (err) {
-      res.writeHead(403, { 'Content-Type': 'application/json' })
-      res.end(JSON.stringify({ err: 'token invalid' }))
-      return
+      console.error('Eroare la decodarea token-ului:', err.message);
+      res.writeHead(403, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Token invalid' }));
+      return;
     }
-    // dcă token-ul este valid, decodează informațiile din token
-    req.user = user
-    callback()
-  })
+    req.user = user; // Setează utilizatorul în req.user
+    console.log('Payload token:', req.user); // Log pentru payload-ul token-ului
+    callback();
+  });
 }
-// eportă funcția verifyToken pentru a fi utilizată în alte fișiere
-module.exports = verifyToken
+
+module.exports = verifyToken;

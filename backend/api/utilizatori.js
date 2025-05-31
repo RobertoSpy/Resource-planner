@@ -1,27 +1,110 @@
+const { pool } = require('../db'); // Importă pool-ul din db.js
+const bcrypt = require('bcrypt'); // Importă bcrypt pentru hash-ul parolei
+const jwt = require('jsonwebtoken');
+require('dotenv').config(); // Încarcă variabilele de mediu din .env
 
-const { pool } = require('../db');
+
+
+function getUserIdFromToken(req) {
+  const authHeader = req.headers['authorization'];
+  console.log('Authorization header:', authHeader); // Log pentru header-ul Authorization
+
+  if (!authHeader) return null;
+
+  const token = authHeader.split(' ')[1];
+  console.log('Token extras:', token); // Log pentru token-ul extras
+
+  if (!token) return null;
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log('Payload token:', decoded); // Log pentru payload-ul token-ului
+    return decoded.id; // Accesează `id` din payload-ul token-ului
+  } catch (err) {
+    console.error('Eroare la decodarea token-ului:', err.message);
+    return null;
+  }
+}
 
 async function getUtilizatori(req, res) {
   try {
-    const result = await pool.query('SELECT * FROM utilizatori');
+    const result = await pool.query('SELECT * FROM utilizator'); // Modificat: utilizatori -> utilizator
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(result.rows));
   } catch (err) {
     res.writeHead(500);
     res.end(JSON.stringify({ error: err.message }));
   }
+} 
+
+async function getUtilizatorAutentificat(req, res, id) {
+  try {
+    const result = await pool.query(
+      'SELECT id, email, nume, rol FROM utilizator WHERE id = $1',
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      res.writeHead(404, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Utilizatorul nu a fost găsit' }));
+      return;
+    }
+
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(result.rows[0]));
+  } catch (err) {
+    console.error('Eroare la obținerea utilizatorului autentificat:', err.message);
+    res.writeHead(500, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: err.message }));
+  }
 }
 
 async function addUtilizator(req, res, body) {
-  const { nume, rol } = JSON.parse(body);
   try {
-    const result = await pool.query(
-      'INSERT INTO utilizatori (nume, rol) VALUES ($1, $2) RETURNING *',
-      [nume, rol]
+    const userId = getUserIdFromToken(req);
+    console.log('userId extras din token:', userId);
+
+    if (!userId) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'ID-ul utilizatorului este necesar' }));
+      return;
+    }
+
+    // Verificăm rolul utilizatorului care face cererea
+    const userResult = await pool.query(
+      'SELECT rol FROM utilizator WHERE id = $1',
+      [userId]
     );
+
+    if (userResult.rows.length === 0) {
+      res.writeHead(403, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Acces interzis: utilizatorul nu există' }));
+      return;
+    }
+
+    const userRole = userResult.rows[0].rol;
+
+    if (userRole !== 'ADMINISTRATOR') {
+      res.writeHead(403, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Acces interzis: doar utilizatorii ADMIN pot crea utilizatori noi' }));
+      return;
+    }
+
+    // Continuăm cu crearea utilizatorului
+    const { email, nume, parola, rol } = JSON.parse(body);
+    console.log('Valori primite:', { email, nume, parola, rol });
+
+    const hash = await bcrypt.hash(parola, 10); // Hash pentru parola
+    const result = await pool.query(
+      'INSERT INTO utilizator (email, nume, parola, rol) VALUES ($1, $2, $3, $4) RETURNING *',
+      [email, nume, hash, rol || 'VANZATOR'] // Rol implicit: VANZATOR
+    );
+    console.log('Utilizator creat cu succes:', result.rows[0]);
+
     res.writeHead(201, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(result.rows[0]));
   } catch (err) {
+    console.error('Eroare la crearea utilizatorului:', err.message);
     res.writeHead(500);
     res.end(JSON.stringify({ error: err.message }));
   }
@@ -31,7 +114,7 @@ async function updateUtilizator(req, res, id, body) {
   const { nume, rol } = JSON.parse(body);
   try {
     const result = await pool.query(
-      'UPDATE utilizatori SET nume = $1, rol = $2 WHERE id = $3 RETURNING *',
+      'UPDATE utilizator SET nume = $1, rol = $2 WHERE id = $3 RETURNING *', // Modificat: utilizatori -> utilizator
       [nume, rol, id]
     );
     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -44,18 +127,52 @@ async function updateUtilizator(req, res, id, body) {
 
 async function deleteUtilizator(req, res, id) {
   try {
-    await pool.query('DELETE FROM utilizatori WHERE id = $1', [id]);
-    res.writeHead(204);
+    const userId = getUserIdFromToken(req); // Extrage userId din token
+    console.log('userId extras din token:', userId);
+
+    if (!userId) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'ID-ul utilizatorului este necesar' }));
+      return;
+    }
+
+    // Verificăm rolul utilizatorului care face cererea
+    const userResult = await pool.query(
+      'SELECT rol FROM utilizator WHERE id = $1',
+      [userId]
+    );
+
+    if (userResult.rows.length === 0) {
+      res.writeHead(403, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Acces interzis: utilizatorul nu există' }));
+      return;
+    }
+
+    const userRole = userResult.rows[0].rol;
+
+    if (userRole !== 'ADMINISTRATOR') {
+      res.writeHead(403, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Acces interzis: doar utilizatorii ADMIN pot șterge utilizatori' }));
+      return;
+    }
+
+    // Continuăm cu ștergerea utilizatorului
+    console.log(`Ștergere utilizator cu ID: ${id}`); // Log pentru ID-ul primit
+    await pool.query('DELETE FROM utilizator WHERE id = $1', [id]); // Interogare SQL pentru ștergere
+    res.writeHead(204); // Răspuns fără conținut
     res.end();
   } catch (err) {
-    res.writeHead(500);
+    console.error('Eroare la ștergerea utilizatorului:', err.message); // Log pentru eroare
+    res.writeHead(500, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: err.message }));
   }
 }
+
 
 module.exports = {
   getUtilizatori,
   addUtilizator,
   updateUtilizator,
-  deleteUtilizator
+  deleteUtilizator,
+  getUtilizatorAutentificat
 };
