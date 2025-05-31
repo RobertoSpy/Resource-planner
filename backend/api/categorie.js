@@ -26,7 +26,7 @@ async function addCategorie(req, res, body) {
     res.writeHead(400);
     res.end('Eroare la adăugarea categoriei');
   }
-}
+} 
 
 async function updateCategorie(req, res, id, body) {
   try {
