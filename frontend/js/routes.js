@@ -40,7 +40,6 @@ async function gasesteSauCreeazaCategorie(numeCategorie) {
 }
 
 
-
 // Funcție pentru încărcarea stocurilor și afișarea categoriilor + produse
 export async function loadStocuri() {
   try {
@@ -227,21 +226,25 @@ const utilizatori = [
   { nume: 'COCEA IUSTIN', id: '27372727', rol: 'ANGAJAT' }
 ];
 
+
 // Funcție pentru pagina de utilizatori
-export function loadUtilizatori() {
+import { fetchUtilizatori, adaugaUtilizator, stergeUtilizator, fetchUtilizatorCurent } from './api.js';
+
+export async function loadUtilizatori() {
   const content = document.getElementById('content');
   content.innerHTML = `
     <h1>Utilizatori</h1>
     <div class="utilizatori-controls">
-      <button class="btn-albastru">Adauga utilizator nou</button>
+      <button id="adauga-utilizator-btn" class="btn-albastru">Adaugă utilizator nou</button>
       <div class="filtru-dropdown">
-        <button class="btn-albastru" id="filtreaza-btn">Filtreaza utilizator</button>
+        <button class="btn-albastru" id="filtreaza-btn">Filtrează utilizator</button>
         <div class="filtru-meniu" id="filtru-meniu" style="display:none;">
           <div data-rol="ADMINISTRATOR">ADMINISTRATOR</div>
-          <div data-rol="ANGAJAT">ANGAJAT</div>
+          <div data-rol="VANZATOR">VÂNZĂTOR</div>
         </div>
       </div>
     </div>
+    <div id="notification" style="display: none; margin-top: 10px; color: green;"></div>
     <table class="utilizatori-table">
       <thead>
         <tr>
@@ -253,44 +256,190 @@ export function loadUtilizatori() {
       </thead>
       <tbody id="utilizatori-body"></tbody>
     </table>
+    <!-- Modal pentru adăugarea utilizatorului -->
+    <div id="add-user-modal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <h2>Adaugă utilizator nou</h2>
+        <form id="add-user-form" action="javascript:void(0);">
+          <label for="email">Email:</label>
+          <input type="email" id="email" name="email" required />
+          <label for="nume">Nume:</label>
+          <input type="text" id="nume" name="nume" required />
+          <label for="parola">Parolă:</label>
+          <input type="password" id="parola" name="parola" required />
+          <div class="modal-buttons">
+            <button type="submit" class="btn-albastru">Adaugă utilizator</button>
+            <button type="button" id="close-modal-btn" class="btn-rosu">Renunță</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <!-- Modal pentru confirmarea ștergerii -->
+    <div id="delete-user-modal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <h2 id="delete-message">Sigur doriți să ștergeți utilizatorul?</h2>
+        <div class="modal-buttons">
+          <button id="confirm-delete-btn" class="btn-albastru">Da</button>
+          <button id="cancel-delete-btn" class="btn-rosu">Nu</button>
+        </div>
+      </div>
+    </div>
   `;
 
+  const adaugaUtilizatorBtn = document.getElementById('adauga-utilizator-btn');
+  const modal = document.getElementById('add-user-modal');
+  const closeModalBtn = document.getElementById('close-modal-btn');
+  const addUserForm = document.getElementById('add-user-form');
+  const deleteModal = document.getElementById('delete-user-modal');
+  const deleteMessage = document.getElementById('delete-message');
+  const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+  const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
   const tbody = document.getElementById('utilizatori-body');
-
-  function afiseazaUtilizatori(lista) {
-    tbody.innerHTML = '';
-    lista.forEach(u => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${u.nume}</td>
-        <td>${u.id}</td>
-        <td>${u.rol}</td>
-        <td>
-          <button class="edit-btn"><i class="fa fa-edit"></i></button>
-          <button class="delete-btn">ELIMINARE</button>
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-
-  afiseazaUtilizatori(utilizatori);
-
-  // Dropdown filtre
   const filtruBtn = document.getElementById('filtreaza-btn');
   const filtruMeniu = document.getElementById('filtru-meniu');
-  filtruBtn.addEventListener('click', () => {
-    filtruMeniu.style.display = filtruMeniu.style.display === 'none' ? 'block' : 'none';
-  });
+  const notification = document.getElementById('notification');
 
-  filtruMeniu.querySelectorAll('div').forEach(option => {
-    option.addEventListener('click', () => {
-      const rol = option.dataset.rol;
-      const filtrati = utilizatori.filter(u => u.rol === rol);
-      afiseazaUtilizatori(filtrati);
-      filtruMeniu.style.display = 'none';
+  let utilizatorDeSters = null; // Variabilă pentru utilizatorul selectat pentru ștergere
+
+  try {
+    const utilizatorCurent = await fetchUtilizatorCurent(); // Obține utilizatorul curent din backend
+    const rol = utilizatorCurent.rol;
+    console.log('Rol utilizator:', rol);
+
+    // Ascunde butoanele pentru utilizatorii cu rolul "VÂNZĂTOR"
+    if (rol === 'VANZATOR') {
+      adaugaUtilizatorBtn.style.display = 'none';
+    }
+
+    // Afișează modalul pentru adăugare utilizator
+    adaugaUtilizatorBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      modal.style.display = 'flex'; // Afișează modalul
     });
-  });
+
+    // Închide modalul pentru adăugare utilizator
+    closeModalBtn.addEventListener('click', () => {
+      modal.style.display = 'none'; // Ascunde modalul
+    });
+
+    // Gestionarea formularului de adăugare utilizator
+    addUserForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const nume = document.getElementById('nume').value;
+      const parola = document.getElementById('parola').value;
+
+      if (!email || !nume || !parola) {
+        showNotification('Toate câmpurile sunt obligatorii!', 'red');
+        return;
+      }
+
+      const utilizator = { email, nume, parola };
+
+      try {
+        await adaugaUtilizator(utilizator);
+        showNotification('Utilizator adăugat cu succes!', 'green');
+        modal.style.display = 'none'; // Închide modalul
+        afiseazaUtilizatori();
+      } catch (err) {
+        console.error('Eroare la adăugarea utilizatorului:', err.message);
+        showNotification('Eroare la adăugarea utilizatorului!', 'red');
+      }
+    });
+
+    async function afiseazaUtilizatori() {
+      try {
+        const utilizatori = await fetchUtilizatori();
+        tbody.innerHTML = '';
+        utilizatori.forEach(u => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${u.nume}</td>
+            <td>${u.id}</td>
+            <td>${u.rol}</td>
+            <td>
+              ${rol === 'ADMINISTRATOR' && u.rol !== 'ADMINISTRATOR' ? `<button class="delete-btn" data-id="${u.id}" data-nume="${u.nume}">ELIMINARE</button>` : ''}
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        const deleteButtons = document.querySelectorAll('.delete-btn');
+        deleteButtons.forEach(button => {
+          button.addEventListener('click', () => {
+            utilizatorDeSters = button.dataset.id;
+            const numeUtilizator = button.dataset.nume;
+            deleteMessage.textContent = `Sigur doriți să ștergeți utilizatorul ${numeUtilizator}?`;
+            deleteModal.style.display = 'flex'; // Afișează modalul de confirmare
+          });
+        });
+      } catch (err) {
+        console.error('Eroare la încărcarea utilizatorilor:', err.message);
+      }
+    }
+
+    // Confirmă ștergerea utilizatorului
+    confirmDeleteBtn.addEventListener('click', async () => {
+      try {
+        await stergeUtilizator(utilizatorDeSters);
+        showNotification('Utilizator eliminat cu succes!', 'green');
+        deleteModal.style.display = 'none'; // Ascunde modalul de confirmare
+        afiseazaUtilizatori();
+      } catch (err) {
+        console.error('Eroare la eliminarea utilizatorului:', err.message);
+        showNotification('Eroare la eliminarea utilizatorului!', 'red');
+      }
+    });
+
+    // Anulează ștergerea utilizatorului
+    cancelDeleteBtn.addEventListener('click', () => {
+      deleteModal.style.display = 'none'; // Ascunde modalul de confirmare
+      utilizatorDeSters = null; // Resetează utilizatorul selectat
+    });
+
+    afiseazaUtilizatori();
+
+    filtruBtn.addEventListener('click', () => {
+      filtruMeniu.style.display = filtruMeniu.style.display === 'none' ? 'block' : 'none';
+    });
+
+    filtruMeniu.querySelectorAll('div').forEach(option => {
+      option.addEventListener('click', async () => {
+        const rol = option.dataset.rol;
+        try {
+          const utilizatori = await fetchUtilizatori();
+          const filtrati = utilizatori.filter(u => u.rol === rol);
+          tbody.innerHTML = '';
+          filtrati.forEach(u => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${u.nume}</td>
+              <td>${u.id}</td>
+              <td>${u.rol}</td>
+              <td>
+                ${rol === 'ADMINISTRATOR' && u.rol !== 'ADMINISTRATOR' ? `<button class="delete-btn" data-id="${u.id}" data-nume="${u.nume}">ELIMINARE</button>` : ''}
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        } catch (err) {
+          console.error('Eroare la filtrarea utilizatorilor:', err.message);
+        }
+        filtruMeniu.style.display = 'none';
+      });
+    });
+
+    function showNotification(message, color) {
+      notification.textContent = message;
+      notification.style.color = color;
+      notification.style.display = 'block';
+      setTimeout(() => {
+        notification.style.display = 'none';
+      }, 3000); // Ascunde notificarea după 3 secunde
+    }
+  } catch (err) {
+    console.error('Eroare la obținerea rolului utilizatorului:', err.message);
+  }
 }
 
 // Funcție pentru Notificări
@@ -329,61 +478,161 @@ export function loadNotificari() {
   });
 }
 
-
 // Setup sidebar și routing
 export function setupRouting() {
   const sidebar = document.getElementById('sidebar');
+  const content = document.getElementById('content');
+
+  // Verifică dacă utilizatorul este autentificat
+  function isAuthenticated() {
+    return !!localStorage.getItem('token');
+  }
+
+  // Afișează pagina de login
+  function showLoginPage() {
+    sidebar.innerHTML = ''; // Ascunde sidebar-ul
+    content.innerHTML = `
+      <h1>Autentificare</h1>
+      <form id="loginForm">
+        <input type="email" id="loginEmail" placeholder="Email" required />
+        <input type="password" id="loginParola" placeholder="Parolă" required />
+        <button type="submit">Autentificare</button>
+      </form>
+      <p id="loginMessage" style="color: red;"></p>
+      <p>Nu ai cont? <button id="goToRegister" style="background: none; color: blue; border: none; cursor: pointer;">Înregistrează-te</button></p>
+    `;
+
+    document.getElementById('goToRegister').addEventListener('click', showRegisterPage);
+
+    const loginForm = document.getElementById('loginForm');
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const parola = document.getElementById('loginParola').value;
+
+      try {
+        const response = await fetch('http://localhost:3000/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, parola }),
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          localStorage.setItem('token', data.token); // Salvează token-ul
+          location.reload(); // Reîncarcă pagina după autentificare
+        } else {
+          document.getElementById('loginMessage').textContent = data.err || 'Eroare la autentificare';
+        }
+      } catch (err) {
+        console.error('Eroare:', err);
+      }
+    });
+  }
+
+  // Afișează pagina de înregistrare
+  function showRegisterPage() {
+    sidebar.innerHTML = ''; // Ascunde sidebar-ul
+    content.innerHTML = `
+      <h1>Înregistrare</h1>
+      <form id="registerForm">
+        <input type="email" id="registerEmail" placeholder="Email" required />
+        <input type="text" id="registerNume" placeholder="Nume" required />
+        <input type="password" id="registerParola" placeholder="Parolă" required />
+        <button type="submit">Înregistrează-te</button>
+      </form>
+      <p id="registerMessage" style="color: red;"></p>
+      <p>Ai deja cont? <button id="goToLogin" style="background: none; color: blue; border: none; cursor: pointer;">Autentifică-te</button></p>
+    `;
+
+    document.getElementById('goToLogin').addEventListener('click', showLoginPage);
+
+    const registerForm = document.getElementById('registerForm');
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('registerEmail').value;
+      const nume = document.getElementById('registerNume').value;
+      const parola = document.getElementById('registerParola').value;
+
+      try {
+        const response = await fetch('http://localhost:3000/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, nume, parola }),
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          document.getElementById('registerMessage').style.color = 'green';
+          document.getElementById('registerMessage').textContent = 'Înregistrare reușită! Te poți autentifica acum.';
+        } else {
+          document.getElementById('registerMessage').textContent = data.err || 'Eroare la înregistrare';
+        }
+      } catch (err) {
+        console.error('Eroare:', err);
+      }
+    });
+  }
+
+  // Logout
+  function logout() {
+    localStorage.removeItem('token'); // Șterge token-ul
+    location.reload(); // Reîncarcă pagina
+  }
+
+  // Dacă utilizatorul nu este autentificat, afișează pagina de login
+  if (!isAuthenticated()) {
+    showLoginPage();
+    return;
+  }
+
+  // Afișează sidebar-ul și configurează rutele
   sidebar.innerHTML = `
     <button id="btn-dashboard">Dashboard</button>
     <button id="btn-stocuri">Stocuri</button>
     <button id="btn-utilizatori">Utilizatori</button>
-     <button id="btn-notificari">Notificări</button>
+    <button id="btn-notificari">Notificări</button>
+    <button id="btn-logout">Logout</button>
   `;
 
-  // Navighează și actualizează URL-ul fără reload
+  document.getElementById('btn-logout').addEventListener('click', logout);
+
   function navigate(path) {
     history.pushState({ path }, '', path);
     renderRoute(path);
   }
 
-  // Renderizează pagina în funcție de path
- function renderRoute(path) {
-  if (path === '/dashboard') {
-    loadDashboard();
-    setActiveButton('btn-dashboard');
-  } else if (path === '/dashboard/stocuri') {
-    loadStocuri();
-    setActiveButton('btn-stocuri');
-  } else if (path === '/dashboard/utilizatori') {
-    
-    loadUtilizatori();
-    setActiveButton('btn-utilizatori');
-  } else if (path === '/dashboard/notificari') {
-    
-    loadNotificari();
-    setActiveButton('btn-notificari');
-  } else {
-    history.replaceState({ path: '/dashboard' }, '', '/dashboard');
-    loadDashboard();
-    setActiveButton('btn-dashboard');
+  function renderRoute(path) {
+    if (path === '/dashboard') {
+      loadDashboard();
+      setActiveButton('btn-dashboard');
+    } else if (path === '/dashboard/stocuri') {
+      loadStocuri();
+      setActiveButton('btn-stocuri');
+    } else if (path === '/dashboard/utilizatori') {
+      loadUtilizatori();
+      setActiveButton('btn-utilizatori');
+    } else if (path === '/dashboard/notificari') {
+      loadNotificari();
+      setActiveButton('btn-notificari');
+    } else {
+      history.replaceState({ path: '/dashboard' }, '', '/dashboard');
+      loadDashboard();
+      setActiveButton('btn-dashboard');
+    }
   }
-}
 
-  // Activează butonul curent în sidebar
   function setActiveButton(btnId) {
     document.querySelectorAll('#sidebar button').forEach(b => b.classList.remove('active'));
     const btn = document.getElementById(btnId);
     if (btn) btn.classList.add('active');
   }
 
-  // Event click pe butoane
   document.getElementById('btn-dashboard').addEventListener('click', () => navigate('/dashboard'));
   document.getElementById('btn-stocuri').addEventListener('click', () => navigate('/dashboard/stocuri'));
   document.getElementById('btn-utilizatori').addEventListener('click', () => navigate('/dashboard/utilizatori'));
-document.getElementById('btn-notificari').addEventListener('click', () => navigate('/dashboard/notificari'));
+  document.getElementById('btn-notificari').addEventListener('click', () => navigate('/dashboard/notificari'));
 
-
-  // Când navighezi înapoi/înainte în browser
   window.addEventListener('popstate', (event) => {
     if (event.state && event.state.path) {
       renderRoute(event.state.path);
@@ -392,6 +641,5 @@ document.getElementById('btn-notificari').addEventListener('click', () => naviga
     }
   });
 
-  
   renderRoute(location.pathname);
 }

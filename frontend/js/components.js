@@ -68,3 +68,17 @@ export function afiseazaCategorii(selector, categorii, onClick) {
     container.appendChild(card);
   });
 }
+
+export function afiseazaModal(modalId, onClose) {
+  const modal = document.getElementById(modalId);
+  const closeModalBtn = modal.querySelector('.btn-rosu');
+
+  // Afișează modalul
+  modal.style.display = 'flex';
+
+  // Închide modalul
+  closeModalBtn.addEventListener('click', () => {
+    modal.style.display = 'none';
+    if (onClose) onClose(); // Callback opțional la închidere
+  });
+}

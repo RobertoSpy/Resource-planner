@@ -5,7 +5,6 @@ CREATE TABLE categorie (
 );
 
 
-
 CREATE TABLE articol (
     id SERIAL PRIMARY KEY,
     nume VARCHAR(150) NOT NULL,
@@ -24,9 +23,11 @@ CREATE TABLE stoc (
 );
 
 CREATE TABLE utilizator (
-    id SERIAL PRIMARY KEY,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    nume VARCHAR(100) NOT NULL
+  id SERIAL PRIMARY KEY,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  nume VARCHAR(255) NOT NULL,
+  parola VARCHAR(255) NOT NULL,
+  rol VARCHAR(50) NOT NULL
 );
 
 
