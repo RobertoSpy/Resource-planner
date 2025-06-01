@@ -55,7 +55,9 @@ async function updateArticol(req, res, id, body) {
       return res.end('Date incomplete pentru articol');
     }
     const query = `
-      UPDATE articol SET nume = $1, cantitate = $2, pret = $3, categorie_id = $4
+      UPDATE articol 
+      SET nume = $1, cantitate = $2, pret = $3, categorie_id = $4, 
+          ultima_notificare = CASE WHEN cantitate != $2 THEN NULL ELSE ultima_notificare END
       WHERE id = $5 RETURNING *
     `;
     const result = await pool.query(query, [nume, cantitate, pret, categorie_id,  id]);
