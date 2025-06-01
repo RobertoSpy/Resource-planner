@@ -102,7 +102,7 @@ CREATE OR REPLACE FUNCTION trigger_verifica_dublura_articol() RETURNS TRIGGER AS
 BEGIN
     IF EXISTS (
         SELECT 1 FROM articol
-        WHERE denumire = NEW.denumire AND id_categorie = NEW.id_categorie
+        WHERE nume = NEW.nume AND categorie_id = NEW.categorie_id
     ) THEN
         RAISE EXCEPTION 'Articol duplicat!';
     END IF;

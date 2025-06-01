@@ -19,37 +19,46 @@ async function getArticole(req, res) {
 
 async function addArticol(req, res, body) {
   try {
-    const { nume, cantitate, categorie_id } = JSON.parse(body);
-    
-    if (!nume || cantitate == null || categorie_id == null) {
+    const { nume, cantitate, pret, categorie_id } = JSON.parse(body);
+
+    if (!nume || cantitate == null || categorie_id == null || pret == null) {
       res.writeHead(400);
       return res.end('Date incomplete pentru articol');
     }
+
     const query = `
-      INSERT INTO articol (nume, cantitate, categorie_id)
-      VALUES ($1, $2, $3) RETURNING *
+      INSERT INTO articol (nume, cantitate, pret, categorie_id)
+      VALUES ($1, $2, $3, $4) RETURNING *
     `;
-    const result = await pool.query(query, [nume, cantitate, categorie_id]);
+    const result = await pool.query(query, [nume, cantitate, pret, categorie_id]);
+
     res.writeHead(201, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(result.rows[0]));
   } catch (err) {
-    res.writeHead(400);
-    res.end('Eroare la adăugarea articolului');
+    if (err.message.includes('Articol duplicat!')) {
+      res.writeHead(409); // Conflict
+      return res.end('Articolul există deja în această categorie!');
+    }
+
+    console.error('Eroare la adăugarea articolului:', err);
+    res.writeHead(409, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: err.message }));
   }
 }
 
+
 async function updateArticol(req, res, id, body) {
   try {
-    const { nume, cantitate, categorie_id } = JSON.parse(body);
+    const { nume, cantitate, pret, categorie_id} = JSON.parse(body);
     if (!nume || cantitate == null || categorie_id == null) {
       res.writeHead(400);
       return res.end('Date incomplete pentru articol');
     }
     const query = `
-      UPDATE articol SET nume = $1, cantitate = $2, categorie_id = $3
-      WHERE id = $4 RETURNING *
+      UPDATE articol SET nume = $1, cantitate = $2, pret = $3, categorie_id = $4
+      WHERE id = $5 RETURNING *
     `;
-    const result = await pool.query(query, [nume, cantitate, categorie_id, id]);
+    const result = await pool.query(query, [nume, cantitate, pret, categorie_id,  id]);
     if (result.rowCount === 0) {
       res.writeHead(404);
       res.end('Articolul nu a fost găsit');
