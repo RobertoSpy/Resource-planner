@@ -179,10 +179,32 @@ async function deleteUtilizator(req, res, id) {
 }
 
 
+
+async function getTopAngajat(req, res) {
+  try {
+    const result = await pool.query(`SELECT * FROM preconizeaza_top_angajat_saptamanal()`);
+    if (result.rows.length === 0) {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ mesaj: 'Niciun angajat activ în ultima săptămână.' }));
+    }
+
+    const top = result.rows[0];
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(top));
+
+  } catch (err) {
+    console.error('Eroare preconizare top angajat:', err.message);
+    res.writeHead(500, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Eroare server' }));
+  }
+}
+
+
 module.exports = {
   getUtilizatori,
   addUtilizator,
   updateUtilizator,
   deleteUtilizator,
-  getUtilizatorAutentificat
+  getUtilizatorAutentificat,
+  getTopAngajat
 };

@@ -7,9 +7,9 @@ const { pool } = require('./db'); // Importă conexiunea la baza de date
 
 // Import funcții API
 
-const { getUtilizatori, addUtilizator, updateUtilizator, deleteUtilizator, getUtilizatorAutentificat } = require('./api/utilizatori');
+const { getUtilizatori, addUtilizator, updateUtilizator, deleteUtilizator, getUtilizatorAutentificat, getTopAngajat } = require('./api/utilizatori');
 
-const { getArticole, addArticol, updateArticol, deleteArticol, getArticoleLowStock, getArticoleLowPrice } = require('./api/articole');
+const { getArticole, addArticol, updateArticol, deleteArticol, getArticoleLowStock, getArticoleLowPrice, adaugaStocArticol } = require('./api/articole');
 
 const { getCategorie, addCategorie, updateCategorie, deleteCategorie } = require('./api/categorie');
 
@@ -46,7 +46,8 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  const { trimiteNotificariStocRedus } = require('./api/notificari');
+  const { trimiteNotificariStocRedus, getNotificari } = require('./api/notificari');
+
 
 // Adaugă ruta pentru notificări
 if (req.url === '/api/notificari/stoc-redus' && req.method === 'GET') {
@@ -54,6 +55,19 @@ if (req.url === '/api/notificari/stoc-redus' && req.method === 'GET') {
   await trimiteNotificariStocRedus(req, res);
   return;
 }
+
+if (req.url === '/api/notificari' && req.method === 'GET') {
+  console.log('Cerere GET la /api/notificari - Ruta detectată corect');
+  await getNotificari(req, res);
+  return;
+}
+
+if (req.url === '/api/top-angajat' && req.method === 'GET') {
+  console.log('Cerere GET la /api/top-angajat - Ruta detectată corect');
+  await getTopAngajat(req, res);
+  return;
+}
+
 
   if (req.url === '/api/utilizatori/me' && req.method === 'GET') {
     console.log('Cerere GET la /api/utilizatori/me');
@@ -153,46 +167,55 @@ if (req.url === '/api/notificari/stoc-redus' && req.method === 'GET') {
 
   // Rute API pentru articole
   if (req.url.startsWith('/api/articole')) {
-    console.log('Cerere la ruta /api/articole');
-    let body = '';
-    req.on('data', chunk => (body += chunk));
-    req.on('end', () => {
-      console.log(`Body primit: ${body}`);
-      const idMatch = req.url.match(/^\/api\/articole\/(\d+)/);
+  console.log('Cerere la ruta /api/articole');
+  let body = '';
+  req.on('data', chunk => (body += chunk));
+  req.on('end', () => {
+    console.log(`Body primit: ${body}`);
+    const idMatch = req.url.match(/^\/api\/articole\/(\d+)/);
+    const adaugaStocMatch = req.url.match(/^\/api\/articole\/(\d+)\/adauga-stoc$/);
 
-      if (req.method === 'GET') {
-        if (req.url === '/api/articole') {
-          console.log('GET articole');
-          getArticole(req, res);
-        } else if (req.url === '/api/articole/low-stock') {
-          console.log('GET articole low-stock');
-          getArticoleLowStock(req, res);
-
-        } else if (req.url === '/api/articole/low-price') {
-          getArticoleLowPrice(req, res);
-
-        } else {
-          console.log('Ruta articole necunoscută');
-          res.writeHead(404);
-          res.end('Not found');
-        }
-      } else if (req.method === 'POST') {
-        console.log('POST articol');
-        addArticol(req, res, body);
-      } else if (req.method === 'PUT' && idMatch) {
-        console.log(`PUT articol cu ID: ${idMatch[1]}`);
-        updateArticol(req, res, idMatch[1], body);
-      } else if (req.method === 'DELETE' && idMatch) {
-        console.log(`DELETE articol cu ID: ${idMatch[1]}`);
-        deleteArticol(req, res, idMatch[1]);
+    if (req.method === 'GET') {
+      if (req.url === '/api/articole') {
+        console.log('GET articole');
+        getArticole(req, res);
+      } else if (req.url === '/api/articole/low-stock') {
+        console.log('GET articole low-stock');
+        getArticoleLowStock(req, res);
+      } else if (req.url === '/api/articole/low-price') {
+        getArticoleLowPrice(req, res);
       } else {
         console.log('Ruta articole necunoscută');
         res.writeHead(404);
         res.end('Not found');
       }
-    });
-    return;
-  }
+    } else if (req.method === 'POST') {
+      console.log('POST articol');
+      addArticol(req, res, body);
+    } else if (req.method === 'PUT') {
+      if (adaugaStocMatch) {
+        console.log(`PUT adauga-stoc articol cu ID: ${adaugaStocMatch[1]}`);
+        adaugaStocArticol(req, res, adaugaStocMatch[1], body);
+      } else if (idMatch) {
+        console.log(`PUT update articol cu ID: ${idMatch[1]}`);
+        updateArticol(req, res, idMatch[1], body);
+      } else {
+        console.log('Ruta PUT necunoscută');
+        res.writeHead(404);
+        res.end('Not found');
+      }
+    } else if (req.method === 'DELETE' && idMatch) {
+      console.log(`DELETE articol cu ID: ${idMatch[1]}`);
+      deleteArticol(req, res, idMatch[1]);
+    } else {
+      console.log('Ruta articole necunoscută');
+      res.writeHead(404);
+      res.end('Not found');
+    }
+  });
+  return;
+}
+
   
   // Rute API pentru categorii
   if (req.url.startsWith('/api/categorie')) {
@@ -259,59 +282,81 @@ testConnection().then(() => {
     console.log(`Backend rulează pe http://0.0.0.0:${PORT}`);
   });
 
-  setInterval(async () => {
-    console.log('Interval: Verificare notificări automate');
-    try {
-      // Selectează produsele cu stoc redus care necesită notificare
-      const produse = await pool.query(`
-        SELECT id, nume, cantitate AS stoc, ultima_notificare 
-        FROM articol 
-        WHERE cantitate < 3 AND (ultima_notificare IS NULL OR ultima_notificare < NOW() - INTERVAL '1 day')
-      `);
-  
-      if (produse.rows.length > 0) {
-        // Elimină duplicatele și trimite un singur email
-        const produseUnice = [...new Map(produse.rows.map(p => [p.nume, p])).values()];
-        console.log(`Produse unice pentru notificare: ${JSON.stringify(produseUnice)}`);
-        await trimiteEmail(produseUnice);
-  
-        // Actualizează data ultimei notificări pentru toate produsele
-        const ids = produseUnice.map(p => p.id);
-        console.log(`ID-uri pentru actualizare în tabelul articol: ${JSON.stringify(ids)}`);
-  
-        const resultArticol = await pool.query('UPDATE articol SET ultima_notificare = NOW() WHERE id = ANY($1)', [ids]);
-        console.log(`Rânduri afectate în tabelul articol: ${resultArticol.rowCount}`);
-  
-        // Adaugă notificări în tabelul notificare dacă nu există deja
-        for (const produs of produseUnice) {
-          const notificareExistenta = await pool.query(`
-            SELECT id FROM notificare 
-            WHERE articol_id = $1 AND trimis = FALSE
-          `, [produs.id]);
-  
-          if (notificareExistenta.rows.length === 0) {
-            await pool.query(`
-              INSERT INTO notificare (articol_id, mesaj, trimis, data_notificare) 
-              VALUES ($1, $2, FALSE, NOW())
-            `, [produs.id, `Stoc scăzut pentru articolul ${produs.nume}`]);
-          }
-        }
-  
-        // Marchează notificările ca trimise
-        const resultNotificare = await pool.query(`
-          UPDATE notificare 
-          SET trimis = TRUE 
-          WHERE mesaj = ANY($1)
-        `, [produseUnice.map(p => `Stoc scăzut pentru articolul ${p.nume}`)]);
-        console.log(`Rânduri afectate în tabelul notificare: ${resultNotificare.rowCount}`);
-      }
-  
-      console.log('Notificările automate au fost trimise.');
-    } catch (err) {
-      console.error('Eroare la trimiterea notificărilor automate:', err.message);
+ setInterval(async () => {
+  console.log('Interval: Verificare notificări automate');
+
+  try {
+    // 1. Selectează articolele cu stoc redus
+    const produse = await pool.query(`
+      SELECT id, nume, cantitate AS stoc, ultima_notificare 
+      FROM articol 
+      WHERE cantitate < 3 AND (ultima_notificare IS NULL OR ultima_notificare < NOW() - INTERVAL '1 day')
+    `);
+
+    const produseUnice = [...new Map(produse.rows.map(p => [p.nume, p])).values()];
+    if (produseUnice.length === 0) {
+      console.log('Nu există produse noi pentru notificare.');
+      return;
     }
-  }, 30 * 1000); // Verifică la fiecare 30 de secunde
-  
+
+    const ids = produseUnice.map(p => p.id);
+
+    // 2. Selectează notificările netrimise existente din DB
+    const notificariExistente = await pool.query(`
+      SELECT n.id, n.mesaj, a.nume, a.cantitate AS stoc, n.articol_id
+      FROM notificare n
+      JOIN articol a ON n.articol_id = a.id
+      WHERE n.articol_id = ANY($1) AND n.trimis = FALSE
+    `, [ids]);
+
+    if (notificariExistente.rows.length > 0) {
+      // 3. Trimite emailul cu notificările netrimise
+      await trimiteEmail(notificariExistente.rows);
+
+      // 4. Marchează-le ca trimise
+      const notifIds = notificariExistente.rows.map(n => n.id);
+      const result = await pool.query(`
+        UPDATE notificare SET trimis = TRUE WHERE id = ANY($1)
+      `, [notifIds]);
+      console.log(`Notificări marcate ca trimise: ${result.rowCount}`);
+    } else {
+      console.log('Nu există notificări netrimise. Verific dacă trebuie să inserez altele...');
+    }
+
+    // 5. Inserează notificări noi doar dacă nu există deja cu trimis = FALSE
+    for (const produs of produseUnice) {
+      const check = await pool.query(`
+        SELECT 1 FROM notificare 
+        WHERE articol_id = $1 AND trimis = FALSE
+      `, [produs.id]);
+
+      if (check.rows.length === 0) {
+        await pool.query(`
+          INSERT INTO notificare (articol_id, mesaj, trimis, data_notificare) 
+          VALUES ($1, $2, FALSE, NOW())
+        `, [produs.id, `Stoc scăzut pentru articolul ${produs.nume}`]);
+
+        console.log(`Notificare nouă adăugată pentru: ${produs.nume}`);
+      } else {
+        console.log(`Notificare deja existentă (netrimisă) pentru: ${produs.nume}`);
+      }
+    }
+
+    // 6. Actualizează ultima_notificare în tabelul articol
+    const resultArticol = await pool.query(`
+      UPDATE articol 
+      SET ultima_notificare = NOW() 
+      WHERE id = ANY($1)
+    `, [ids]);
+    console.log(`Articole actualizate cu ultima_notificare: ${resultArticol.rowCount}`);
+
+    console.log('Notificările automate au fost procesate cu succes.');
+  } catch (err) {
+    console.error('Eroare la procesarea notificărilor automate:', err.message);
+  }
+}, 30 * 1000);
+
+
 }).catch((err) => {
   console.error('Eroare la conexiunea cu baza de date:', err.message);
   process.exit(1);

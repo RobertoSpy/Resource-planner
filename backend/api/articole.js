@@ -119,6 +119,55 @@ async function getArticoleLowPrice(req, res) {
   }
 }
 
+
+async function adaugaStocArticol(req, res, id, body) {
+  try {
+    const { cantitate } = JSON.parse(body);
+
+    if (!cantitate || isNaN(cantitate) || cantitate <= 0) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ error: 'Cantitate invalidă' }));
+    }
+
+    // 1. Actualizează cantitatea
+    const updateResult = await pool.query(
+      `UPDATE articol 
+       SET cantitate = cantitate + $1, ultima_notificare = NULL 
+       WHERE id = $2 RETURNING *`,
+      [cantitate, id]
+    );
+
+    if (updateResult.rowCount === 0) {
+      res.writeHead(404);
+      return res.end(JSON.stringify({ error: 'Articolul nu a fost găsit' }));
+    }
+
+    const articol = updateResult.rows[0];
+
+    // 2. Dacă stocul a devenit >= 3, șterge notificările TRIMISE
+    if (articol.cantitate >= 3) {
+  await pool.query(
+    `DELETE FROM notificare 
+     WHERE articol_id = $1`,
+    [id]
+  );
+}
+
+
+    // 3. Răspuns OK
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      message: 'Stoc actualizat cu succes',
+      articol
+    }));
+
+  } catch (err) {
+    console.error('Eroare la adăugarea stocului:', err);
+    res.writeHead(500, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Eroare server' }));
+  }
+}
+
 module.exports = {
   getArticole,
   addArticol,
@@ -126,4 +175,6 @@ module.exports = {
   deleteArticol,
   getArticoleLowStock,
   getArticoleLowPrice,
+  adaugaStocArticol
+  
 };

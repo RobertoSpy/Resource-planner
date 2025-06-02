@@ -5,13 +5,13 @@ const { trimiteEmail } = require('../email'); // Importă funcția pentru trimit
 async function trimiteNotificariStocRedus(req, res) {
   try {
     // Selectează notificările netrimise
-    const notificari = await pool.query(`
-      SELECT n.id, n.mesaj, u.email
-      FROM notificare n
-      JOIN utilizator u ON n.utilizator_id = u.id
-      WHERE n.trimis = FALSE
-    `);
-    
+  const notificari = await pool.query(`
+  SELECT n.id, n.mesaj, a.nume, a.cantitate AS stoc
+  FROM notificare n
+  JOIN articol a ON n.articol_id = a.id
+  WHERE n.trimis = FALSE
+`);
+
     console.log(`Rezultate interogare: ${JSON.stringify(notificari.rows)}`);
 
     if (notificari.rows.length > 0) {
@@ -33,6 +33,26 @@ async function trimiteNotificariStocRedus(req, res) {
   }
 }
 
+async function getNotificari(req, res) {
+  try {
+    const result = await pool.query(`
+      SELECT n.id, n.mesaj, a.nume AS articol, a.cantitate AS stoc,  a.id AS articol_id
+      FROM notificare n
+      JOIN articol a ON n.articol_id = a.id
+      WHERE n.trimis = TRUE
+    `);
+
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(result.rows));
+  } catch (err) {
+    console.error('Eroare la preluarea notificărilor:', err.message);
+    res.writeHead(500, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Eroare la preluarea notificărilor' }));
+  }
+}
+
+
 module.exports = {
   trimiteNotificariStocRedus,
+  getNotificari,
 };

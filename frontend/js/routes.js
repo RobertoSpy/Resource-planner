@@ -2,7 +2,7 @@ import { categorii, produseLowStock, produseLowPrice } from './data.js';
 import { afiseazaCategorii, afiseazaProduseCategorie, afiseazaProduseDashboard } from './components.js';
 
 
-import { fetchArticoleLowStock, fetchArticoleLowPrice, fetchCategorii, fetchArticole, adaugaCategorie} from './api.js';
+import { fetchArticoleLowStock, fetchArticoleLowPrice, fetchCategorii, fetchArticole, adaugaCategorie, adaugaStoc, fetchNotificari} from './api.js';
 import { adaugaArticol, deleteArticol1, updateArticol } from './apiFetch/articolFetch.js';
 
 
@@ -443,16 +443,21 @@ export async function loadUtilizatori() {
 }
 
 // Funcție pentru Notificări
-export function loadNotificari() {
+// presupunând că ai această funcție
+
+
+
+export async function loadNotificari() {
   const content = document.getElementById('content');
   content.innerHTML = `
-    <h1>Notificari</h1>
+    <h1>Notificări trimise privind stoc redus</h1>
     <table class="notificari-table">
       <thead>
         <tr>
-          <th>PRODUS</th>
           <th>ID</th>
+          <th>PRODUS</th>
           <th>STOC</th>
+          <th>MESAJ</th>
           <th>VERIFICARE</th>
         </tr>
       </thead>
@@ -460,22 +465,55 @@ export function loadNotificari() {
     </table>
   `;
 
-  const toateProdusele = [...produseLowStock, ...produseLowPrice];
-  const produseUnice = toateProdusele.filter((p, index, self) =>
-    index === self.findIndex((x) => x.id === p.id)
-  );
-
   const tbody = document.getElementById('notificari-body');
-  produseUnice.forEach(p => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${p.nume}</td>
-      <td>${p.id}</td>
-      <td>${p.stoc}</td>
-      <td><button class="verificare-btn">${p.stoc === 0 ? 'DA' : 'NU'}</button></td>
-    `;
-    tbody.appendChild(tr);
-  });
+
+  try {
+    const raspuns = await fetch('/api/notificari');
+    const notificari = await raspuns.json();
+
+    notificari.forEach(n => {
+      const tr = document.createElement('tr');
+      tr.dataset.articolId = n.articol_id;  
+      tr.innerHTML = `
+        <td>${n.id}</td>
+        <td>${n.articol}</td>
+        <td>${n.stoc}</td>
+        <td>${n.mesaj}</td>
+        <td>
+          <input type="number" min="1" value="1" style="width: 60px; margin-right: 5px;" class="input-stoc" />
+          <button class="adauga-stoc-btn btn-albastru">Adaugă stoc</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    // Event listener pentru fiecare buton
+    tbody.querySelectorAll('.adauga-stoc-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const row = btn.closest('tr');
+        const articolId = row.dataset.articolId;
+        const input = row.querySelector('.input-stoc');
+        const cantitate = parseInt(input.value);
+
+        if (!articolId || isNaN(cantitate) || cantitate <= 0) {
+          alert('Date invalide!');
+          return;
+        }
+
+        try {
+          await adaugaStoc(articolId, cantitate);
+          row.remove(); 
+        } catch (err) {
+          console.error('Eroare:', err.message);
+          alert('Eroare la actualizarea stocului.');
+        }
+      });
+    });
+
+  } catch (err) {
+    console.error('Eroare la încărcarea notificărilor:', err.message);
+    tbody.innerHTML = `<tr><td colspan="5" style="color:red;">Eroare la încărcarea notificărilor</td></tr>`;
+  }
 }
 
 // Setup sidebar și routing

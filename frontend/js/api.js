@@ -116,3 +116,25 @@ export async function fetchUtilizatorCurent() {
   return await res.json(); // Returnează informațiile utilizatorului curent
 }
 
+export async function fetchNotificari() {
+  const res = await fetch('/api/notificari');
+  if (!res.ok) throw new Error('Eroare la încărcarea notificărilor');
+  return await res.json();
+}
+
+export async function adaugaStoc(id, cantitate) {
+  const res = await fetch(`/api/articole/${id}/adauga-stoc`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ cantitate })
+  });
+
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.error || 'Eroare la actualizarea stocului');
+  }
+
+  return await res.json();
+}
+
+
