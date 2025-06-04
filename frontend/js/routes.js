@@ -442,11 +442,6 @@ export async function loadUtilizatori() {
   }
 }
 
-// Funcție pentru Notificări
-// presupunând că ai această funcție
-
-
-
 export async function loadNotificari() {
   const content = document.getElementById('content');
   content.innerHTML = `
@@ -528,17 +523,24 @@ export function setupRouting() {
 
   // Afișează pagina de login
   function showLoginPage() {
-    sidebar.innerHTML = ''; // Ascunde sidebar-ul
-    content.innerHTML = `
-      <h1>Autentificare</h1>
-      <form id="loginForm">
-        <input type="email" id="loginEmail" placeholder="Email" required />
-        <input type="password" id="loginParola" placeholder="Parolă" required />
-        <button type="submit">Autentificare</button>
-      </form>
-      <p id="loginMessage" style="color: red;"></p>
-      <p>Nu ai cont? <button id="goToRegister" style="background: none; color: blue; border: none; cursor: pointer;">Înregistrează-te</button></p>
-    `;
+     sidebar.style.display = 'none';
+content.innerHTML = `
+  <div class="auth-form-container">
+    <h1>Autentificare</h1>
+    <form id="loginForm" class="auth-form">
+      <input type="email" id="loginEmail" placeholder="Email" required class="auth-input" />
+      <input type="password" id="loginParola" placeholder="Parolă" required class="auth-input" />
+      <button type="submit" class="auth-submit-button">Autentificare</button>
+    </form>
+    <p id="loginMessage" class="auth-message"></p>
+    <p class="auth-link-message">Nu ai cont? 
+      <button id="goToRegister" class="auth-link-button">Înregistrează-te</button>
+    </p>
+  </div>
+`;
+
+
+
 
     document.getElementById('goToRegister').addEventListener('click', showRegisterPage);
 
@@ -558,6 +560,7 @@ export function setupRouting() {
         const data = await response.json();
         if (response.ok) {
           localStorage.setItem('token', data.token); // Salvează token-ul
+          navigate('/dashboard')
           location.reload(); // Reîncarcă pagina după autentificare
         } else {
           document.getElementById('loginMessage').textContent = data.err || 'Eroare la autentificare';
@@ -570,18 +573,23 @@ export function setupRouting() {
 
   // Afișează pagina de înregistrare
   function showRegisterPage() {
-    sidebar.innerHTML = ''; // Ascunde sidebar-ul
+    sidebar.style.display = 'none';
     content.innerHTML = `
+     <div class="auth-form-container">
       <h1>Înregistrare</h1>
-      <form id="registerForm">
-        <input type="email" id="registerEmail" placeholder="Email" required />
-        <input type="text" id="registerNume" placeholder="Nume" required />
-        <input type="password" id="registerParola" placeholder="Parolă" required />
-        <button type="submit">Înregistrează-te</button>
+      <form id="registerForm" class="auth-form">
+        <input type="email" id="registerEmail" placeholder="Email" required class="auth-input" />
+        <input type="text" id="registerNume" placeholder="Nume" required class="auth-input" />
+        <input type="password" id="registerParola" placeholder="Parolă" required class="auth-input" />
+        <button type="submit" class="auth-submit-button">Înregistrează-te</button>
       </form>
-      <p id="registerMessage" style="color: red;"></p>
-      <p>Ai deja cont? <button id="goToLogin" style="background: none; color: blue; border: none; cursor: pointer;">Autentifică-te</button></p>
-    `;
+      <p id="registerMessage" class="auth-message"></p>
+      <p class="auth-link-message">
+        Ai deja cont?
+        <button id="goToLogin" class="auth-link-button">Autentifică-te</button>
+      </p>
+    </div>
+  `;
 
     document.getElementById('goToLogin').addEventListener('click', showLoginPage);
 
@@ -615,7 +623,7 @@ export function setupRouting() {
   // Logout
   function logout() {
     localStorage.removeItem('token'); // Șterge token-ul
-    location.reload(); // Reîncarcă pagina
+    navigate('/auth');
   }
 
   // Dacă utilizatorul nu este autentificat, afișează pagina de login
@@ -653,6 +661,8 @@ export function setupRouting() {
     } else if (path === '/dashboard/notificari') {
       loadNotificari();
       setActiveButton('btn-notificari');
+    } else if (path === '/auth') {
+      showLoginPage();
     } else {
       history.replaceState({ path: '/dashboard' }, '', '/dashboard');
       loadDashboard();
