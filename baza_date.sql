@@ -1,9 +1,7 @@
--- Creare tabele
 CREATE TABLE categorie (
     id SERIAL PRIMARY KEY,
     nume VARCHAR(100) UNIQUE NOT NULL
 );
-
 
 CREATE TABLE articol (
     id SERIAL PRIMARY KEY,
@@ -22,7 +20,6 @@ CREATE TABLE utilizator (
   rol VARCHAR(50) NOT NULL
 );
 
-
 CREATE TABLE notificare (
     id SERIAL PRIMARY KEY,
     articol_id INTEGER NOT NULL,
@@ -32,6 +29,28 @@ CREATE TABLE notificare (
     CONSTRAINT fk_articol FOREIGN KEY (articol_id) REFERENCES articol(id),
  
 );
+
+
+INSERT INTO categorie (nume) VALUES
+('Consumabile'),
+('Piese de schimb'),
+('Medicamente'),
+('Cosmetice');
+
+INSERT INTO articol (nume, cantitate, categorie_id, pret) VALUES
+('Bec incandescent', 15, 1, 10),
+('Lemn pentru foc', 5, 1, 20),
+('Toner imprimanta', 2, 2, 120),
+('Crema hidratanta', 20, 4, 5);
+
+INSERT INTO utilizator (email, nume) VALUES
+('ion.popescu@example.com', 'Ion Popescu'),
+('maria.ionescu@example.com', 'Maria Ionescu');
+
+INSERT INTO stoc(id_articol, id_utilizator, cantitate, prag_alerta) VALUES
+(1, 1, 3, 5),
+(2, 2, 1, 2),
+(3, 1, 10, 3);
 
 
 CREATE OR REPLACE FUNCTION verifica_stocuri(prag INTEGER DEFAULT 5)
@@ -44,15 +63,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
-
-
-
 CREATE OR REPLACE FUNCTION trigger_notificare_stoc()
 RETURNS TRIGGER AS $$
 BEGIN
     IF NEW.cantitate < 3 THEN
-       
+
         IF NOT EXISTS (
             SELECT 1 FROM notificare
             WHERE articol_id = NEW.id
@@ -76,7 +91,6 @@ CREATE TRIGGER trg_notificare_stoc
 AFTER INSERT OR UPDATE ON articol
 FOR EACH ROW
 EXECUTE FUNCTION trigger_notificare_stoc();
-
 
 
 CREATE OR REPLACE FUNCTION trigger_verifica_dublura_articol() RETURNS TRIGGER AS $$
