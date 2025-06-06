@@ -7,10 +7,10 @@ export function afiseazaProduseDashboard(selector, produse) {
 
   container.innerHTML = produse.map(p => `
     <div class="produs-card">
-      <img src="${p.imagine || 'placeholder.jpg'}" alt="${p.nume}" />
+      <img src="resources/articole.jpg" alt="${p.nume}" />
       <h3>${p.nume}</h3>
-      <p>Preț: ${p.pret} lei</p>
-      <p>Stoc: ${p.cantitate}</p>
+     <p style="margin: 0.25rem 0;">Preț: ${p.pret} lei</p>
+      <p style="margin: 0.25rem 0;">Stoc: ${p.cantitate}</p>
     </div>
   `).join('');
 }
@@ -32,7 +32,7 @@ export function afiseazaProduseCategorie(selector, produse, onDelete, onEdit) {
         <button class="btn-edit" data-id="${p.id}">✏️</button>
         <button class="btn-delete" data-id="${p.id}">🗑️</button>
       </div>
-      <img src="${p.imagine || 'placeholder.jpg'}" alt="${p.nume}" />
+      <img src="/resources/articole.jpg" alt="${p.nume}" />
       <h3>${p.nume}</h3>
       <p>Pret: ${p.pret} lei</p>
       <p>Stoc: ${p.cantitate}</p> 
@@ -57,17 +57,53 @@ export function afiseazaProduseCategorie(selector, produse, onDelete, onEdit) {
 }
 
 
-export function afiseazaCategorii(selector, categorii, onClick) {
+export function afiseazaCategorii(selector, categorii, onClick, onDelete) {
   const container = document.querySelector(selector);
   container.innerHTML = '';
+
   categorii.forEach(cat => {
     const card = document.createElement('div');
     card.classList.add('categorie-card');
-    card.textContent = cat.nume;
+
+    const img = document.createElement('img');
+    img.src = "/resources/articole.jpg";
+    img.alt = cat.nume;
+
+    const titlu = document.createElement('div');
+    titlu.classList.add('categorie-nume');
+    titlu.textContent = cat.nume;
+
+    // Butonul de ștergere
+    const btnDelete = document.createElement('button');
+    btnDelete.textContent = '🗑️';
+    btnDelete.title = 'Șterge categoria';
+    btnDelete.style.marginLeft = '10px';
+    btnDelete.style.cursor = 'pointer';
+
+    // Eveniment pentru ștergere cu confirmare
+    btnDelete.addEventListener('click', async (e) => {
+      e.stopPropagation(); // previne declanșarea click-ului pe card
+      if (confirm(`Sigur vrei să ștergi categoria "${cat.nume}" și toate articolele din ea?`)) {
+        try {
+          await onDelete(cat);
+          alert('Categoria a fost ștearsă cu succes.');
+        } catch (err) {
+          alert('Eroare la ștergerea categoriei: ' + err.message);
+        }
+      }
+    });
+
+    card.appendChild(img);
+    card.appendChild(titlu);
+    card.appendChild(btnDelete);
+
+    
     card.addEventListener('click', () => onClick(cat));
+
     container.appendChild(card);
   });
 }
+
 
 export function afiseazaModal(modalId, onClose) {
   const modal = document.getElementById(modalId);

@@ -14,14 +14,6 @@ CREATE TABLE articol (
     CONSTRAINT fk_categorie FOREIGN KEY (categorie_id) REFERENCES categorie(id)
 );
 
-CREATE TABLE stoc (
-    id_stoc SERIAL PRIMARY KEY,
-    id_articol INTEGER REFERENCES articol(id_articol),
-    id_utilizator INTEGER REFERENCES utilizator(id_utilizator),
-    cantitate INTEGER NOT NULL,
-    prag_alerta INTEGER NOT NULL
-);
-
 CREATE TABLE utilizator (
   id SERIAL PRIMARY KEY,
   email VARCHAR(255) UNIQUE NOT NULL,
@@ -38,35 +30,10 @@ CREATE TABLE notificare (
     trimis BOOLEAN default FALSE,
     data_notificare TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_articol FOREIGN KEY (articol_id) REFERENCES articol(id),
-    CONSTRAINT fk_utilizator FOREIGN KEY (utilizator_id) REFERENCES utilizator(id)
+ 
 );
 
 
--- Populare categorii
-INSERT INTO categorie (nume) VALUES
-('Consumabile'),
-('Piese de schimb'),
-('Medicamente'),
-('Cosmetice');
-
-
-INSERT INTO articol (nume, cantitate, categorie_id, pret) VALUES
-('Bec incandescent', 15, 1, 10),
-('Lemn pentru foc', 5, 1, 20),
-('Toner imprimanta', 2, 2, 120),
-('Crema hidratanta', 20, 4, 5);
-
-
-INSERT INTO utilizator (email, nume) VALUES
-('ion.popescu@example.com', 'Ion Popescu'),
-('maria.ionescu@example.com', 'Maria Ionescu');
-
-INSERT INTO stoc(id_articol, id_utilizator, cantitate, prag_alerta) VALUES
-(1, 1, 3, 5),
-(2, 2, 1, 2),
-(3, 1, 10, 3);
-
--- Functie PL/pgSQL care returneaza articole cu cantitate sub un prag
 CREATE OR REPLACE FUNCTION verifica_stocuri(prag INTEGER DEFAULT 5)
 RETURNS TABLE(id INTEGER, nume VARCHAR, cantitate INTEGER, pret NUMERIC) AS $$
 BEGIN
@@ -85,7 +52,7 @@ CREATE OR REPLACE FUNCTION trigger_notificare_stoc()
 RETURNS TRIGGER AS $$
 BEGIN
     IF NEW.cantitate < 3 THEN
-        -- Verifică dacă există deja o notificare pentru acest articol, indiferent de trimis
+       
         IF NOT EXISTS (
             SELECT 1 FROM notificare
             WHERE articol_id = NEW.id
@@ -111,7 +78,7 @@ FOR EACH ROW
 EXECUTE FUNCTION trigger_notificare_stoc();
 
 
--- Trigger: la adăugare articol, verifică să nu fie duplicat
+
 CREATE OR REPLACE FUNCTION trigger_verifica_dublura_articol() RETURNS TRIGGER AS $$
 BEGIN
     IF EXISTS (
@@ -129,6 +96,9 @@ BEFORE INSERT ON articol
 FOR EACH ROW
 EXECUTE FUNCTION trigger_verifica_dublura_articol();
 
+
+
+
 CREATE OR REPLACE FUNCTION preconizeaza_top_angajat_saptamanal()
 RETURNS TABLE (
   angajat_id INTEGER,
@@ -142,7 +112,7 @@ BEGIN
   FROM actiuni_angajati aa
   JOIN articol a ON a.id = aa.articol_id
   WHERE aa.timestamp >= NOW() - INTERVAL '7 days'
-    AND a.cantitate >= 3 -- presupunem că a fost completat
+    AND a.cantitate >= 3
   GROUP BY aa.angajat_id
   ORDER BY total_completari DESC
   LIMIT 1;

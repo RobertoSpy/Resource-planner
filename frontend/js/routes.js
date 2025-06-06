@@ -2,33 +2,108 @@ import { categorii, produseLowStock, produseLowPrice } from './data.js';
 import { afiseazaCategorii, afiseazaProduseCategorie, afiseazaProduseDashboard } from './components.js';
 
 
-import { fetchArticoleLowStock, fetchArticoleLowPrice, fetchCategorii, fetchArticole, adaugaCategorie, adaugaStoc, fetchNotificari} from './api.js';
+import { fetchArticoleLowStock, fetchArticoleLowPrice, fetchCategorii, fetchArticole, adaugaCategorie, adaugaStoc, fetchNotificari, stergeCategorie} from './api.js';
 import { adaugaArticol, deleteArticol1, updateArticol } from './apiFetch/articolFetch.js';
 
 
 // Funcția loadDashboard 
+
+const { jsPDF } = window.jspdf;
+
 export async function loadDashboard() {
   const content = document.getElementById('content');
+  console.log('loadDashboard a fost apelată');
+
   content.innerHTML = `
     <h1>Dashboard</h1>
+
     <section>
       <h2>Top 5 Produse cele mai ieftine</h2>
       <div class="scroll-container" id="lowPrice"></div>
     </section>
+
     <section>
       <h2>Top 5 Produse aproape epuizate</h2>
       <div class="scroll-container" id="almostEmpty"></div>
     </section>
+
+    <section id="sectiune-pdf">
+      <h2>Exportă statisticile</h2>
+      <div style="text-align: center; margin-top: 20px;">
+        <button id="btn-generare-pdf">Generează PDF statistici</button>
+      </div>
+    </section>
   `;
 
-  
-   const produseLowPrice = await fetchArticoleLowPrice();
-
+  const produseLowPrice = await fetchArticoleLowPrice();
   const produseLowStock = await fetchArticoleLowStock();
 
-  afiseazaProduseDashboard('#almostEmpty', produseLowStock.slice(0, 10));
-  afiseazaProduseDashboard('#lowPrice', produseLowPrice.slice(0, 10));
+  afiseazaProduseDashboard('#lowPrice', produseLowPrice.slice(0, 5));
+  afiseazaProduseDashboard('#almostEmpty', produseLowStock.slice(0, 5));
+
+  const btnPDF = document.getElementById('btn-generare-pdf');
+  if (!btnPDF) {
+    console.error('Butonul PDF nu a fost găsit în DOM!');
+    return;
+  }
+
+  btnPDF.addEventListener('click', async () => {
+    console.log('Butonul Generează PDF a fost apăsat.');
+
+    const doc = new jsPDF();
+    let y = 10;
+
+    doc.setFontSize(16);
+    doc.text('Statistica completă stocuri', 10, y);
+    y += 10;
+
+    try {
+      const categorii = await fetchCategorii();
+      const articole = await fetchArticole();
+
+      for (const categorie of categorii) {
+        doc.setFontSize(14);
+        doc.text(`Categorie: ${categorie.nume}`, 10, y);
+        y += 8;
+
+        const produse = articole.filter(p => p.categorie_id === categorie.id);
+
+        if (produse.length === 0) {
+          doc.setFontSize(11);
+          doc.text('— Fara produse —', 14, y);
+          y += 6;
+          continue;
+        }
+
+        doc.setFontSize(11);
+        doc.text('Nume', 14, y);
+        doc.text('Cant.', 80, y);
+        doc.text('Pret (lei)', 120, y);
+        y += 6;
+
+        for (const produs of produse) {
+          const pret = parseFloat(produs.pret);  // Verificăm dacă produs.pret este un număr valid
+          doc.text(produs.nume, 14, y);
+          doc.text(String(produs.cantitate), 80, y);
+          doc.text(pret.toFixed(2), 120, y);  // Aplicăm toFixed doar după ce am validat că pret este un număr
+          y += 6;
+
+          if (y > 270) {
+            doc.addPage();
+            y = 10;
+          }
+        }
+
+        y += 4;
+      }
+
+      doc.save('statistica-stocuri.pdf');
+    } catch (err) {
+      alert('Eroare la generarea PDF-ului: ' + err.message);
+    }
+  });
 }
+
 
 async function gasesteSauCreeazaCategorie(numeCategorie) {
   const categorii = await fetchCategorii();
@@ -50,8 +125,8 @@ export async function loadStocuri() {
     content.innerHTML = `
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <h1>Categorii Produse</h1>
-        <button id="btn-adauga-categorie">Adaugă categorie</button>
-        <button id="btn-importa-stocuri">Importă stocuri</button>
+        <button id="btn-adauga-categorie" class="btn">➕ Adaugă categorie</button>
+        <button id="btn-importa-stocuri" class="btn">📁 Importă stocuri</button>
         <input type="file" id="input-import-fisier" accept=".csv" style="display:none;" />
       </div>
       <div class="scroll-container" id="categorii"></div>
@@ -59,21 +134,16 @@ export async function loadStocuri() {
       <div id="form-categorie-container" style="margin-top: 10px;"></div>
     `;
 
-    // Atașăm event listener pentru butonul de import
     document.getElementById('btn-importa-stocuri').addEventListener('click', () => {
       document.getElementById('input-import-fisier').click();
     });
 
-    
-
-    // Atașăm event listener pentru inputul de fișier
     document.getElementById('input-import-fisier').addEventListener('change', (e) => {
-
-  const Papa = window.Papa; 
-  if (!Papa) {
-    console.error("PapaParse nu este încărcat!");
-    return;
-  }
+      const Papa = window.Papa;
+      if (!Papa) {
+        console.error("PapaParse nu este încărcat!");
+        return;
+      }
 
       const file = e.target.files[0];
       if (!file) return;
@@ -102,89 +172,115 @@ export async function loadStocuri() {
       });
     });
 
-    // Funcție pentru afișarea categoriilor și atașarea eventurilor
-    afiseazaCategorii('#categorii', categorii, (categorie) => {
-      const produseFiltrate = articole.filter(p => p.categorie_id === categorie.id);
+    // Afișăm categoriile cu callback pentru afișare produse și ștergere categorie
+    afiseazaCategorii('#categorii', categorii,
+      (categorie) => {  // afișare produse categorie
+        const produseFiltrate = articole.filter(p => p.categorie_id === categorie.id);
 
-      const produseContainer = document.getElementById('produse-categorie');
-      produseContainer.innerHTML = `
-        <h2>Produse în categoria: ${categorie.nume}</h2>
-        <form id="add-produs-form">
-          <input type="hidden" name="categorie_id" value="${categorie.id}" />
-          <input type="text" name="nume" placeholder="Nume produs" required />
-          <input type="number" name="cantitate" placeholder="Cantitate" required />
-          <input type="number" name="pret" placeholder="Preț" required step="0.01" />
-          <button type="submit">Adaugă</button>
-        </form>
-        <div class="scroll-container" id="produse"></div>
-      `;
+        const produseContainer = document.getElementById('produse-categorie');
+        produseContainer.innerHTML = `
+          <h2>Produse în categoria: ${categorie.nume}</h2>
+          <form id="add-produs-form">
+            <input type="hidden" name="categorie_id" value="${categorie.id}" />
+            <input type="text" class="form-control" name="nume" placeholder="Nume produs" required />
+            <input type="number" class="form-control" name="cantitate" placeholder="Cantitate" required />
+            <input type="number" class="form-control" name="pret" placeholder="Preț" required step="0.01" />
+            <button type="submit" class="btn">✅ Adaugă produs</button>
+          </form>
 
-      afiseazaProduseCategorie('#produse', produseFiltrate, handleDelete, handleEdit);
+          <div class="scroll-container" id="produse"></div>
+        `;
 
-      const form = document.getElementById('add-produs-form');
-      let idEdit = null;
+        afiseazaProduseCategorie('#produse', produseFiltrate, handleDelete, handleEdit);
 
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const formData = new FormData(form);
-        const produs = {
-          nume: formData.get('nume'),
-          cantitate: parseInt(formData.get('cantitate')),
-          pret: parseFloat(formData.get('pret')),
-          categorie_id: parseInt(formData.get('categorie_id'))
-        };
+        const form = document.getElementById('add-produs-form');
+        let idEdit = null;
 
-        try {
-          if (idEdit) {
-            await updateArticol(idEdit, produs);
-            articole = articole.map(a => a.id === idEdit ? { ...a, ...produs } : a);
-          } else {
-            const produsAdaugat = await adaugaArticol(produs);
-            articole.push(produsAdaugat);
-          }
-          const produseReincarcate = articole.filter(p => p.categorie_id === categorie.id);
-          afiseazaProduseCategorie('#produse', produseReincarcate, handleDelete, handleEdit);
-          form.reset();
-          idEdit = null;
-        } catch (err) {
-          alert(err.message || 'Eroare necunoscută la adăugarea produsului');
-        }
-      });
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const formData = new FormData(form);
+          const produs = {
+            nume: formData.get('nume'),
+            cantitate: parseInt(formData.get('cantitate')),
+            pret: parseFloat(formData.get('pret')),
+            categorie_id: parseInt(formData.get('categorie_id'))
+          };
 
-      function handleEdit(id) {
-        const articol = articole.find(a => a.id === id);
-        if (!articol) return;
-        form.nume.value = articol.nume;
-        form.cantitate.value = articol.cantitate;
-        form.pret.value = articol.pret;
-        form.categorie_id.value = articol.categorie_id;
-        idEdit = id;
-      }
-
-      async function handleDelete(id) {
-        try {
-          await deleteArticol1(id);
-          articole = articole.filter(a => a.id !== id);
-          const produseReincarcate = articole.filter(p => p.categorie_id === categorie.id);
-          afiseazaProduseCategorie('#produse', produseReincarcate, handleDelete, handleEdit);
-          if (idEdit === id) {
+          try {
+            if (idEdit) {
+              await updateArticol(idEdit, produs);
+              articole = articole.map(a => a.id === idEdit ? { ...a, ...produs } : a);
+            } else {
+              const produsAdaugat = await adaugaArticol(produs);
+              articole.push(produsAdaugat);
+            }
+            const produseReincarcate = articole.filter(p => p.categorie_id === categorie.id);
+            afiseazaProduseCategorie('#produse', produseReincarcate, handleDelete, handleEdit);
             form.reset();
             idEdit = null;
+          } catch (err) {
+            alert(err.message || 'Eroare necunoscută la adăugarea produsului');
           }
+        });
+
+        function handleEdit(id) {
+          const articol = articole.find(a => a.id === id);
+          if (!articol) return;
+          form.nume.value = articol.nume;
+          form.cantitate.value = articol.cantitate;
+          form.pret.value = articol.pret;
+          form.categorie_id.value = articol.categorie_id;
+          idEdit = id;
+        }
+
+        async function handleDelete(id) {
+          try {
+            await deleteArticol1(id);
+            articole = articole.filter(a => a.id !== id);
+            const produseReincarcate = articole.filter(p => p.categorie_id === categorie.id);
+            afiseazaProduseCategorie('#produse', produseReincarcate, handleDelete, handleEdit);
+            if (idEdit === id) {
+              form.reset();
+              idEdit = null;
+            }
+          } catch (err) {
+            alert('Eroare la ștergerea articolului');
+          }
+        }
+      },
+      async (categorie) => {  // funcția de ștergere categorie cu confirmare
+        if (!confirm(`Ești sigur că vrei să ștergi categoria "${categorie.nume}" și toate produsele ei?`)) {
+          return;
+        }
+        try {
+          // Ștergem toate articolele din categoria respectivă
+          const articoleDeSters = articole.filter(a => a.categorie_id === categorie.id);
+          for (const articol of articoleDeSters) {
+            await deleteArticol1(articol.id);
+          }
+          // Ștergem categoria
+          await stergeCategorie(categorie.id);
+
+          // Reîncărcăm datele și UI-ul
+          categorii = await fetchCategorii();
+          articole = await fetchArticole();
+          loadStocuri();
         } catch (err) {
-          alert('Eroare la ștergerea articolului');
+          alert('Eroare la ștergerea categoriei: ' + err.message);
         }
       }
-    });
+    );
 
     // Buton adaugă categorie
     document.getElementById('btn-adauga-categorie').addEventListener('click', () => {
       const formContainer = document.getElementById('form-categorie-container');
       formContainer.innerHTML = `
         <form id="form-adauga-categorie">
-          <input type="text" name="nume" placeholder="Nume categorie" required />
-          <button type="submit">Salvează</button>
-          <button type="button" id="btn-anuleaza-categorie">Anulează</button>
+          <input type="text" name="nume" class="form-control" placeholder="Nume categorie" required />
+          <div style="display: flex; gap: 10px;">
+            <button type="submit" class="btn">💾 Salvează</button>
+            <button type="button" class="btn" id="btn-anuleaza-categorie">❌ Anulează</button>
+          </div>
         </form>
       `;
 
@@ -218,6 +314,7 @@ export async function loadStocuri() {
     content.innerHTML = `<p style="color:red;">${err.message}</p>`;
   }
 }
+
 
 
 

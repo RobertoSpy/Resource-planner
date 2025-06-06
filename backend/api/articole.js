@@ -36,7 +36,7 @@ async function addArticol(req, res, body) {
     res.end(JSON.stringify(result.rows[0]));
   } catch (err) {
     if (err.message.includes('Articol duplicat!')) {
-      res.writeHead(409); // Conflict
+      res.writeHead(409);
       return res.end('Articolul există deja în această categorie!');
     }
 

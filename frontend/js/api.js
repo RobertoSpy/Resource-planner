@@ -82,14 +82,14 @@ export async function adaugaUtilizator(utilizator) {
 
 // Șterge un utilizator (doar pentru administratori)
 export async function stergeUtilizator(id) {
-  const res = await fetch(`/api/utilizatori/${id}`, { // Ruta corectă
+  const res = await fetch(`/api/utilizatori/${id}`, { 
     method: 'DELETE',
     headers: {
-      Authorization: `Bearer ${localStorage.getItem('token')}` // Dacă autentificarea este necesară
+      Authorization: `Bearer ${localStorage.getItem('token')}` 
     }
   });
   if (!res.ok) throw new Error('Eroare la ștergerea utilizatorului');
-  // Nu parsezi răspunsul ca JSON, deoarece este gol
+ 
 }
 
 // Modifică un utilizator (doar pentru administratori)
@@ -109,11 +109,11 @@ export async function modificaUtilizator(id, utilizator) {
 export async function fetchUtilizatorCurent() {
   const res = await fetch('/api/utilizatori/me', {
     headers: {
-      Authorization: `Bearer ${localStorage.getItem('token')}` // Trimite token-ul pentru autentificare
+      Authorization: `Bearer ${localStorage.getItem('token')}` 
     }
   });
   if (!res.ok) throw new Error('Eroare la obținerea utilizatorului curent');
-  return await res.json(); // Returnează informațiile utilizatorului curent
+  return await res.json(); 
 }
 
 export async function fetchNotificari() {
