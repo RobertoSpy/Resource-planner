@@ -1,0 +1,53 @@
+  <div id="utilizatori-page">
+    <h1>Utilizatori</h1>
+    <div class="utilizatori-controls">
+      <button id="adauga-utilizator-btn" class="btn-albastru">Adaugă utilizator nou</button>
+      <div class="filtru-dropdown">
+        <button class="btn-albastru" id="filtreaza-btn">Filtrează utilizator</button>
+        <div class="filtru-meniu" id="filtru-meniu" style="display:none;">
+          <div data-rol="ADMINISTRATOR">ADMINISTRATOR</div>
+          <div data-rol="VANZATOR">VÂNZĂTOR</div>
+        </div>
+      </div>
+    </div>
+    <div id="notification" style="display: none; margin-top: 10px; color: green;"></div>
+    <table class="utilizatori-table">
+      <thead>
+        <tr>
+          <th>NUME</th>
+          <th>ID</th>
+          <th>ROL</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="utilizatori-body"></tbody>
+    </table>
+    <!-- Modal pentru adăugarea utilizatorului -->
+    <div id="add-user-modal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <h2>Adaugă utilizator nou</h2>
+        <form id="add-user-form" action="javascript:void(0);">
+          <label for="email">Email:</label>
+          <input type="email" id="email" name="email" required />
+          <label for="nume">Nume:</label>
+          <input type="text" id="nume" name="nume" required />
+          <label for="parola">Parolă:</label>
+          <input type="password" id="parola" name="parola" required />
+          <div class="modal-buttons">
+            <button type="submit" class="btn-albastru">Adaugă utilizator</button>
+            <button type="button" id="close-modal-btn" class="btn-rosu">Renunță</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <!-- Modal pentru confirmarea ștergerii -->
+    <div id="delete-user-modal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <h2 id="delete-message">Sigur doriți să ștergeți utilizatorul?</h2>
+        <div class="modal-buttons">
+          <button id="confirm-delete-btn" class="btn-albastru">Da</button>
+          <button id="cancel-delete-btn" class="btn-rosu">Nu</button>
+        </div>
+      </div>
+    </div>
+  </div>

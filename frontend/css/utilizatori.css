@@ -1,0 +1,285 @@
+#utilizatori-page .utilizatori-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; /* ca să nu se extindă prea mult coloanele */
+  word-wrap: break-word;
+}
+
+#utilizatori-page .utilizatori-table th,
+#utilizatori-page .utilizatori-table td {
+  padding: 10px;
+  text-align: center;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+/* Controalele de sus să fie flex wrap pe mobil */
+#utilizatori-page .utilizatori-controls {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+#utilizatori-page .btn-albastru,
+#utilizatori-page .btn-rosu,
+#utilizatori-page .btn {
+  padding: 8px 14px;
+  font-size: 14px;
+  border-radius: 5px;
+  cursor: pointer;
+  white-space: nowrap;
+  min-width: 120px;
+}
+
+#utilizatori-page .btn-albastru {
+  background-color: #002D62;
+  color: white;
+  border: none;
+}
+
+#utilizatori-page .btn-rosu {
+  background-color: #DC3545;
+  color: white;
+  border: none;
+}
+
+#utilizatori-page .btn-albastru:hover,
+#utilizatori-page .btn-rosu:hover,
+#utilizatori-page .btn:hover {
+  opacity: 0.9;
+}
+
+#utilizatori-page .filtru-dropdown {
+  position: relative;
+}
+
+#utilizatori-page .filtru-meniu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  border: 1px solid #ccc;
+  z-index: 10;
+  min-width: 140px;
+}
+
+#utilizatori-page .filtru-meniu div {
+  padding: 5px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+#utilizatori-page .filtru-meniu div:hover {
+  background-color: #eee;
+}
+
+#utilizatori-page .edit-btn {
+  background-color: #003366;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  margin-right: 5px;
+  cursor: pointer;
+}
+
+#utilizatori-page .delete-btn {
+  background-color: #e53935;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#utilizatori-page .modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: none; /* ascuns implicit */
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+#utilizatori-page .modal-content {
+  background-color: #fff;
+  width: 90%;
+  max-width: 400px;
+  padding: 20px;
+  border-radius: 8px;
+  box-sizing: border-box;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#utilizatori-page .modal-content h2 {
+  margin-top: 0;
+}
+
+#utilizatori-page .modal-content label {
+  display: block;
+  margin: 10px 0 5px;
+}
+
+#utilizatori-page .modal-content input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+#utilizatori-page .modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+#utilizatori-page .modal-buttons button {
+  flex-grow: 1;
+  min-width: 100px;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+#utilizatori-page #btn-generare-pdf {
+  background-color: #0073e6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-top: 20px;
+  margin-bottom: 1rem;
+}
+
+#utilizatori-page #btn-generare-pdf:hover {
+  background-color: #0055aa;
+}
+
+/* Responsive pentru telefoane mici */
+@media (max-width: 600px) {
+  #utilizatori-page .utilizatori-table,
+  #utilizatori-page .utilizatori-table thead,
+  #utilizatori-page .utilizatori-table tbody,
+  #utilizatori-page .utilizatori-table th,
+  #utilizatori-page .utilizatori-table td,
+  #utilizatori-page .utilizatori-table tr {
+    display: block;
+    width: 100%;
+  }
+
+  #utilizatori-page .utilizatori-table thead tr {
+    display: none; /* ascunde headerul tabelului */
+  }
+
+  #utilizatori-page .utilizatori-table tbody tr {
+    margin-bottom: 15px;
+    padding: 10px;
+    background: transparent; /* transparent, aerisit */
+    box-shadow: none;
+    border: 1px solid #ccc; /* contur extern vizibil */
+    border-radius: 8px;
+  }
+
+  #utilizatori-page .utilizatori-table tbody td {
+    text-align: left;
+    padding: 12px 15px;
+    position: relative;
+    border: none; /* elimină liniile */
+    font-size: 14px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  /* Data-label (numele coloanei) */
+  #utilizatori-page .utilizatori-table tbody td::before {
+    content: attr(data-label);
+    font-weight: 700;
+    margin-bottom: 6px;
+    display: block;
+    color: #555;
+  }
+
+  /* Culoare diferită pentru coloana NUME */
+  #utilizatori-page .utilizatori-table tbody td[data-label="NUME"] {
+    background-color: #e3f2fd; /* albastru deschis */
+    box-sizing: border-box; /* să includă padding-ul în dimensiuni */
+  width: 100%; /* să ocupe toată lățimea disponibilă */
+  padding: 10px 15px;
+  }
+
+  /* Culoare diferită pentru coloana ROL */
+  #utilizatori-page .utilizatori-table tbody td[data-label="ROL"] {
+    background-color: #fff3e0; /* galben deschis */
+    box-sizing: border-box; /* să includă padding-ul în dimensiuni */
+  width: 100%; /* să ocupe toată lățimea disponibilă */
+  padding: 10px 15px;
+  }
+
+  /* Coloana ID neutră, transparentă */
+  #utilizatori-page .utilizatori-table tbody td[data-label="ID"] {
+    background-color: transparent;
+    box-sizing: border-box; /* să includă padding-ul în dimensiuni */
+  width: 100%; /* să ocupe toată lățimea disponibilă */
+  padding: 10px 15px;
+  }
+
+  /* Coloana cu butonul */
+  #utilizatori-page .utilizatori-table tbody td[data-label=""] {
+    background-color: transparent;
+    padding: 10px 0 0 15px;
+    text-align: left;
+  }
+
+  /* Butonul de eliminare să arate decent pe mobil */
+  #utilizatori-page .delete-btn {
+    background-color: #f44336; /* roșu */
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  #utilizatori-page .delete-btn:hover {
+    background-color: #d32f2f;
+  }
+
+  /* Controalele de sus pe mobil */
+  #utilizatori-page .utilizatori-controls {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+/* Responsive pentru tablete */
+@media (max-width: 900px) and (min-width: 601px) {
+  #utilizatori-page .utilizatori-table th,
+  #utilizatori-page .utilizatori-table td {
+    font-size: 13px;
+    padding: 8px;
+  }
+
+  #utilizatori-page .btn-albastru,
+  #utilizatori-page .btn-rosu,
+  #utilizatori-page .btn {
+    min-width: 100px;
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  #utilizatori-page .utilizatori-controls {
+    gap: 8px;
+  }
+}

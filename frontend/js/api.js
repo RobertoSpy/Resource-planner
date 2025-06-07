@@ -137,4 +137,34 @@ export async function adaugaStoc(id, cantitate) {
   return await res.json();
 }
 
+export async function loginUser(email, parola) {
+  try {
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, parola }),
+    });
 
+    const data = await response.json();
+    return { ok: response.ok, data };
+  } catch (err) {
+    console.error('Eroare la login:', err);
+    return { ok: false, data: { err: 'Eroare la login' } };
+  }
+}
+
+export async function registerUser(email, nume, parola) {
+  try {
+    const response = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, nume, parola }),
+    });
+
+    const data = await response.json();
+    return { ok: response.ok, data };
+  } catch (err) {
+    console.error('Eroare la înregistrare:', err);
+    return { ok: false, data: { err: 'Eroare la înregistrare' } };
+  }
+}

@@ -118,3 +118,13 @@ export function afiseazaModal(modalId, onClose) {
     if (onClose) onClose(); // Callback opțional la închidere
   });
 }
+
+export function showNotification(message, color = 'green') {
+  const notification = document.getElementById('notification');
+  notification.textContent = message;
+  notification.style.color = color;
+  notification.style.display = 'block';
+  setTimeout(() => {
+    notification.style.display = 'none';
+  }, 3000);
+}

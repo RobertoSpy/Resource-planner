@@ -32,7 +32,7 @@ function parseBody(req) {
 async function handleAuthRoutes(req, res) {
   console.log(`Cerere primită: ${req.method} ${req.url}`); // Log pentru fiecare cerere
 
-  if (req.method === 'POST' && req.url === '/auth/register') {
+  if (req.method === 'POST' && req.url === '/api/auth/register') {
     try {
       const { email, nume, parola } = await parseBody(req);
       console.log('Body procesat:', { email, nume, parola }); // Log pentru corpul cererii procesate
@@ -100,7 +100,7 @@ async function handleAuthRoutes(req, res) {
     return;
   }
   
-  if (req.method === 'POST' && req.url === '/auth/login') {
+  if (req.method === 'POST' && req.url === '/api/auth/login') {
     try {
       const { email, parola } = await parseBody(req);
       console.log('Body procesat pentru login:', { email, parola }); // Log pentru corpul cererii procesate

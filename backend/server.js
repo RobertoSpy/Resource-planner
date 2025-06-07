@@ -119,7 +119,7 @@ if (req.url === '/api/top-angajat' && req.method === 'GET') {
   }
 
   // Rutele de autentificare
-  if (req.url.startsWith('/auth')) {
+  if (req.url.startsWith('/api/auth')) {
     console.log('Cerere la ruta de autentificare');
     await handleAuthRoutes(req, res);
     return;
