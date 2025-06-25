@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="css/utilizatori.css" />
 </head>
 <body>
+   <button id="hamburger"></button>
   <div id="container">
     <nav id="sidebar">
    <!-- in js setupRouting-->
@@ -21,7 +22,45 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-
+<script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
   <script type="module" src="js/index.js"></script>
+  <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const hamburger = document.getElementById("hamburger");
+    const sidebar = document.getElementById("sidebar");
+
+    // Setează simbolul inițial
+    hamburger.innerHTML = "&#9776;"; // ☰
+
+    function updateButtonIcon() {
+      const isVisible = sidebar.classList.contains("mobile-visible");
+      hamburger.innerHTML = isVisible ? "&#10006;" : "&#9776;"; // ✖ sau ☰
+    }
+
+    hamburger.addEventListener("click", function () {
+      sidebar.classList.toggle("mobile-visible");
+      sidebar.classList.toggle("mobile-hidden");
+      updateButtonIcon();
+    });
+
+    if (window.innerWidth <= 768) {
+      sidebar.classList.add("mobile-hidden");
+      updateButtonIcon();
+    }
+
+    window.addEventListener("resize", function () {
+      if (window.innerWidth <= 768) {
+        sidebar.classList.add("mobile-hidden");
+        sidebar.classList.remove("mobile-visible");
+      } else {
+        sidebar.classList.remove("mobile-hidden");
+        sidebar.classList.remove("mobile-visible");
+      }
+      updateButtonIcon();
+    });
+  });
+</script>
+
 </body>
+
 </html>
