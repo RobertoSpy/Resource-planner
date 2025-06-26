@@ -390,40 +390,47 @@ export function setupRouting() {
   const sidebar = document.getElementById('sidebar');
   const content = document.getElementById('content');
 
-  // Verifică dacă utilizatorul este autentificat
   function isAuthenticated() {
     return !!localStorage.getItem('token');
   }
 
-  // Logout
-  function logout() {
-    localStorage.removeItem('token'); // Șterge token-ul
-    navigate('/auth');
+  function navigate(path) {
+    history.pushState({ path }, '', path);
+    renderRoute(path);
   }
 
-  // Dacă utilizatorul nu este autentificat, afișează pagina de login
+  function logout() {
+    localStorage.removeItem('token');
+    navigate('/auth'); // Aici va funcționa, pt. că `navigate` e definit mai sus
+  }
+
   if (!isAuthenticated()) {
     showLoginPage();
     return;
   }
 
-  // Afișează sidebar-ul și configurează rutele
   sidebar.innerHTML = `
-    <button id="btn-dashboard">Dashboard</button>
-    <button id="btn-stocuri">Stocuri</button>
-    <button id="btn-utilizatori">Utilizatori</button>
-    <button id="btn-notificari">Notificări</button>
-    <button id="btn-logout">Logout</button>
+    <div class="menu-bottom" id="sidebar-menu">
+      <button id="btn-dashboard">Dashboard</button>
+      <button id="btn-stocuri">Stocuri</button>
+      <button id="btn-utilizatori">Utilizatori</button>
+      <button id="btn-notificari">Notificări</button>
+      <button id="btn-logout">Logout</button>
+    </div>
   `;
+
+  const hamburger = document.getElementById('hamburger-toggle');
+  const sidebarMenu = document.getElementById('sidebar-menu');
+
+  if (hamburger && sidebarMenu) {
+    hamburger.addEventListener('click', () => {
+      sidebarMenu.classList.toggle('open');
+    });
+  }
 
   document.getElementById('btn-logout').addEventListener('click', logout);
 
-  function navigate (path) {
-    history.pushState({ path }, '', path);
-    renderRoute(path);
-  }
-
-  function renderRoute (path) {
+  function renderRoute(path) {
     if (path === '/dashboard') {
       loadDashboard();
       setActiveButton('btn-dashboard');

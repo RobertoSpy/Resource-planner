@@ -1,0 +1,437 @@
+openapi: 3.0.3
+info:
+  title: Resource Planner API
+  version: 1.0.0
+  description: API REST pentru gestionarea articolelor, categoriilor, utilizatorilor și notificărilor de stoc.
+servers:
+  - url: http://localhost:3000/api
+    description: Local development server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Articol:
+      type: object
+      properties:
+        id:
+          type: integer
+        nume:
+          type: string
+        cantitate:
+          type: integer
+        pret:
+          type: number
+        categorie_id:
+          type: integer
+        categorie_nume:
+          type: string
+        ultima_notificare:
+          type: string
+          format: date-time
+    Categorie:
+      type: object
+      properties:
+        id:
+          type: integer
+        nume:
+          type: string
+    Utilizator:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        nume:
+          type: string
+        rol:
+          type: string
+    Notificare:
+      type: object
+      properties:
+        id:
+          type: integer
+        articol_id:
+          type: integer
+        mesaj:
+          type: string
+        trimis:
+          type: boolean
+        data_notificare:
+          type: string
+          format: date-time
+        articol:
+          type: string
+        stoc:
+          type: integer
+
+security:
+  - bearerAuth: []
+
+paths:
+  /articole:
+    get:
+      summary: Obține lista tuturor articolelor
+      tags: [Articole]
+      responses:
+        200:
+          description: Lista articolelor
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Articol'
+    post:
+      summary: Adaugă un articol nou
+      tags: [Articole]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nume:
+                  type: string
+                cantitate:
+                  type: integer
+                pret:
+                  type: number
+                categorie_id:
+                  type: integer
+      responses:
+        201:
+          description: Articol creat
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Articol'
+
+  /articole/{id}:
+    put:
+      summary: Modifică un articol existent
+      tags: [Articole]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nume:
+                  type: string
+                cantitate:
+                  type: integer
+                pret:
+                  type: number
+                categorie_id:
+                  type: integer
+      responses:
+        200:
+          description: Articol modificat
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Articol'
+    delete:
+      summary: Șterge un articol
+      tags: [Articole]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Articol șters
+
+  /articole/low-stock:
+    get:
+      summary: Returnează articole cu stoc scăzut
+      tags: [Articole]
+      responses:
+        200:
+          description: Lista articolelor cu stoc mic
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Articol'
+
+  /articole/low-price:
+    get:
+      summary: Returnează top 5 produse ieftine
+      tags: [Articole]
+      responses:
+        200:
+          description: Lista articolelor ieftine
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Articol'
+
+  /articole/{id}/adauga-stoc:
+    put:
+      summary: Adaugă stoc la un articol
+      tags: [Articole]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cantitate:
+                  type: integer
+      responses:
+        200:
+          description: Stoc actualizat
+
+  /categorie:
+    get:
+      summary: Obține lista categoriilor
+      tags: [Categorii]
+      responses:
+        200:
+          description: Lista categoriilor
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Categorie'
+    post:
+      summary: Adaugă o categorie nouă
+      tags: [Categorii]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nume:
+                  type: string
+      responses:
+        201:
+          description: Categorie creată
+
+  /categorie/{id}:
+    put:
+      summary: Modifică o categorie
+      tags: [Categorii]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nume:
+                  type: string
+      responses:
+        200:
+          description: Categorie modificată
+    delete:
+      summary: Șterge o categorie
+      tags: [Categorii]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Categorie ștearsă
+
+  /auth/register:
+    post:
+      summary: Înregistrare administrator
+      tags: [Autentificare]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                nume:
+                  type: string
+                parola:
+                  type: string
+      responses:
+        201:
+          description: Administrator creat
+
+  /auth/login:
+    post:
+      summary: Login utilizator
+      tags: [Autentificare]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                parola:
+                  type: string
+      responses:
+        200:
+          description: Login reușit
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+
+  /utilizatori:
+    get:
+      summary: Obține lista utilizatorilor
+      tags: [Utilizatori]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Lista utilizatorilor
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Utilizator'
+    post:
+      summary: Creează un vânzător (doar admin)
+      tags: [Utilizatori]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                nume:
+                  type: string
+                parola:
+                  type: string
+      responses:
+        201:
+          description: Vânzător creat
+
+  /utilizatori/{id}:
+    put:
+      summary: Modifică un utilizator (doar admin)
+      tags: [Utilizatori]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                nume:
+                  type: string
+                parola:
+                  type: string
+      responses:
+        200:
+          description: Utilizator modificat
+    delete:
+      summary: Șterge un utilizator (doar admin)
+      tags: [Utilizatori]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Utilizator șters
+
+  /utilizatori/me:
+    get:
+      summary: Returnează datele utilizatorului autentificat
+      tags: [Utilizatori]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Date utilizator
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Utilizator'
+
+  /notificari:
+    get:
+      summary: Obține notificările de stoc scăzut
+      tags: [Notificări]
+      responses:
+        200:
+          description: Lista notificărilor
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notificare'
+
+  /notificari/stoc-redus:
+    get:
+      summary: Forțează trimiterea notificărilor de stoc redus
+      tags: [Notificări]
+      responses:
+        200:
+          description: Notificări procesate

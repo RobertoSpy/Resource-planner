@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <title>Resource Planner - Raport de Proiect</title>
+  <meta name="author" content="Echipa XYZ">
+  <meta name="date" content="2025-06-25">
+  <link rel="stylesheet" href="https://scholarly.vernacular.io/styles/scholarly.min.css">
+</head>
+<body>
+  <article>
+    <h1>Resource Planner: Raport de proiect</h1>
+    <p><strong>Autori:</strong> RobertoSpy, ...</p>
+    <p><strong>Data:</strong> 25.06.2025</p>
+
+    <section id="introducere">
+      <h2>1. Introducere</h2>
+      <p>
+        Resource Planner este o aplicație Web pentru gestiunea și monitorizarea stocurilor de produse, dedicată companiilor mici și mijlocii. Oferă funcționalități de administrare a articolelor, categoriilor, utilizatorilor, precum și notificări automate la stoc redus.
+      </p>
+    </section>
+
+    <section id="cerinte-functionale">
+      <h2>2. Cerințe funcționale</h2>
+      <ul>
+        <li>Autentificare pe bază de email/parolă, roluri (administrator/vânzător)</li>
+        <li>CRUD articole și categorii</li>
+        <li>CRUD utilizatori (doar administrator)</li>
+        <li>Notificări automate prin email la stoc redus</li>
+        <li>Export PDF statistici, import CSV stocuri</li>
+        <li>Dashboard cu produse ieftine și aproape epuizate</li>
+      </ul>
+    </section>
+
+    <section id="cerinte-nonfunctionale">
+      <h2>3. Cerințe non-funcționale</h2>
+      <ul>
+        <li>Aplicație Web responsive (HTML5, CSS3)</li>
+        <li>Securitate: JWT, parole hash-uite</li>
+        <li>Portabilitate: Docker, baze de date SQL standard</li>
+        <li>Licență liberă pentru cod și conținut (MIT, CC BY 4.0)</li>
+      </ul>
+    </section>
+
+    <section id="arhitectura">
+      <h2>4. Arhitectura sistemului</h2>
+      <figure>
+        <img src="architecture.png" alt="Arhitectură sistem Resource Planner" style="max-width: 80%;">
+        <figcaption>Figura 1. Diagrama arhitecturii de ansamblu (model C4 - context & containere)</figcaption>
+      </figure>
+      <p>
+        Aplicația are o arhitectură tipică client-server: frontend SPA (JS/HTML/CSS), backend Node.js (REST API), bază de date PostgreSQL, email pentru notificări. Backend-ul expune endpointuri REST documentate OpenAPI.
+      </p>
+    </section>
+
+    <section id="modelare-date">
+      <h2>5. Modelarea datelor</h2>
+      <ul>
+        <li><strong>articol</strong>: id, nume, cantitate, pret, categorie_id, ultima_notificare</li>
+        <li><strong>categorie</strong>: id, nume</li>
+        <li><strong>utilizator</strong>: id, email, nume, parola (hash), rol</li>
+        <li><strong>notificare</strong>: id, articol_id, mesaj, trimis, data_notificare</li>
+      </ul>
+      <p>Datele pot fi importate rapid via CSV sau generate cu Mockaroo.</p>
+    </section>
+
+    <section id="design-ui">
+      <h2>6. Design UI</h2>
+      <p>
+        Interfața este responsive, minimalistă, inspirată de resurse ca <a href="https://nodesign.dev/">NoDesign.dev</a> și <a href="https://uifaces.co/">UI Faces</a>. Am ales o paletă clară și componente simple, pentru accesibilitate și ușurință în utilizare.
+      </p>
+    </section>
+
+    <section id="flux-utilizator">
+      <h2>7. Flux de utilizare</h2>
+      <p>
+        Utilizatorul se autentifică, accesează dashboard-ul, administrează produse/categorii, primește notificări la stoc redus, poate exporta rapoarte în PDF.
+      </p>
+    </section>
+
+    <section id="etape-dezvoltare">
+      <h2>8. Etapele dezvoltării</h2>
+      <ul>
+        <li>Prototipare UI & modelare date</li>
+        <li>Implementare backend REST & notificări</li>
+        <li>Implementare frontend SPA</li>
+        <li>Testare, populare cu date de test</li>
+        <li>Documentație OpenAPI și raport</li>
+      </ul>
+    </section>
+
+    <section id="concluzii">
+      <h2>9. Concluzii</h2>
+      <p>
+        Resource Planner oferă o soluție completă, extensibilă și ușor de folosit pentru gestiunea resurselor și notificarea automată privind stocurile.
+      </p>
+    </section>
+  </article>
+</body>
+</html>

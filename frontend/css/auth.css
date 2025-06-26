@@ -3,8 +3,8 @@
   margin: 60px auto;
   padding: 30px;
   border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  background: #ffffff;
+   box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
+  background: #fff;
   font-family: 'Segoe UI', sans-serif;
 }
 
