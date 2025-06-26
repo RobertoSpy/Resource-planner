@@ -17,7 +17,7 @@ html, body {
 
 #sidebar {
   width: 220px;
-  background-color: #003366;
+  background-color: #036;
   display: flex;
   flex-direction: column;
   padding: 1rem;
@@ -77,7 +77,7 @@ section {
 section h2 {
   text-align: center;
   font-weight: 700;
-  color: #003366;
+   color: #036;
   margin-bottom: 1rem;
 }
 
@@ -94,6 +94,7 @@ section h2 {
 .scroll-container::-webkit-scrollbar {
   height: 8px;
 }
+
 .scroll-container::-webkit-scrollbar-thumb {
   background-color: #888;
   border-radius: 4px;
@@ -104,14 +105,14 @@ section h2 {
   flex: 0 0 220px;
   background-color: #fff;
   border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 10%);
   padding: 1rem;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  color: #003366;
+  color: #036;
   font-weight: 600;
   gap: 0.5rem;
   text-align: center;
@@ -124,7 +125,7 @@ section h2 {
   transform: scale(1.05);
 }
 
-.scroll-container > div img,
+/* PUNE AICI întâi regulile pentru .produs-card și .categorie-card */
 .produs-card img {
   width: auto;
   max-width: 100%;
@@ -134,11 +135,36 @@ section h2 {
   border-radius: 6px;
 }
 
-.scroll-container > div strong,
-.scroll-container > div span,
 .produs-card strong,
 .produs-card span {
-  color: #003366;
+  color: #036;
+  font-weight: 600;
+  text-align: center;
+  user-select: none;
+}
+
+.categorie-card img {
+  width: 100%;
+  height: 100px;
+  object-fit: contain;
+  display: block;
+  margin-bottom: 8px;
+  border-radius: 6px;
+}
+
+/* Abia DUPĂ aceea regulile pentru .scroll-container > div ... */
+.scroll-container > div img {
+  width: auto;
+  max-width: 100%;
+  max-height: 60px;
+  object-fit: contain;
+  margin-bottom: 0.5rem;
+  border-radius: 6px;
+}
+
+.scroll-container > div strong,
+.scroll-container > div span {
+  color: #036;
   font-weight: 600;
   text-align: center;
   user-select: none;
@@ -151,6 +177,7 @@ section h2 {
   padding: 10px;
 }
 
+
 .categorie-card {
   border: 1px solid #ccc;
   border-radius: 8px;
@@ -159,21 +186,14 @@ section h2 {
   text-align: center;
   background-color: #f9f9f9;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+   box-shadow: 0 2px 6px rgb(0 0 0 / 10%);
   transition: box-shadow 0.3s ease;
 }
 
-.categorie-card img {
-  width: 100%;
-  height: 100px;
-  object-fit: contain;
-  display: block;
-  margin-bottom: 8px;
-  border-radius: 6px;
-}
+
 
 .categorie-card:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 20%);
 }
 
 .notificari-table {
@@ -226,7 +246,7 @@ section h2 {
 }
 
 /* Doar pentru ecrane mici */
-@media (max-width: 768px) {
+@media (width <= 768px)  {
   #hamburger {
     display: block;
   }

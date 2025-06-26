@@ -9,8 +9,11 @@ CREATE TABLE articol (
     cantitate INTEGER NOT NULL CHECK (cantitate >= 0),
     categorie_id INTEGER NOT NULL,
     pret NUMERIC(10, 2),
+
     CONSTRAINT fk_categorie FOREIGN KEY (categorie_id) REFERENCES categorie(id)
 );
+
+ALTER TABLE articol ADD COLUMN ultima_notificare timestamp;
 
 CREATE TABLE utilizator (
   id SERIAL PRIMARY KEY,
@@ -49,7 +52,7 @@ CREATE OR REPLACE FUNCTION public.verifica_stocuri(prag integer DEFAULT 5)
  AS $function$                                                                               
  BEGIN                                                                                       
      IF NEW.cantitate < 3 THEN                                                               
-         -- Verifică dacă există deja o notificare pentru acest articol, indiferent de trimis
+         
          IF NOT EXISTS (                                                                     
              SELECT 1 FROM notificare                                                        
              WHERE articol_id = NEW.id                                                       
