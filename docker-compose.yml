@@ -1,0 +1,39 @@
+services:
+  backend:
+    build: ./backend
+    container_name: backend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    environment:
+      DB_USER: postgres
+      DB_PASSWORD: WEB
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: mydatabase
+      JWT_SECRET: supersecretjwt
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "8081:80"
+    depends_on:
+      - backend
+
+  postgres:
+    image: postgres:latest
+    container_name: my-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: WEB
+      POSTGRES_DB: mydatabase
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./baza_date.sql:/docker-entrypoint-initdb.d/init.sql
+
+volumes:
+  pgdata:
