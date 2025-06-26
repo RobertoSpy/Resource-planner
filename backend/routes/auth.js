@@ -36,29 +36,40 @@ async function handleAuthRoutes(req, res) {
     try {
       const { email, nume, parola } = await parseBody(req);
       console.log('Body procesat:', { email, nume, parola }); // Log pentru corpul cererii procesate
-  
+
+      // Verifică dacă există deja un admin
+      const adminCheck = await pool.query(
+        'SELECT * FROM utilizator WHERE rol = $1 LIMIT 1',
+        ['ADMINISTRATOR']
+      );
+
+      if (adminCheck.rows.length > 0) {
+        console.warn('Încercare de creare a unui al doilea administrator blocată');
+        res.writeHead(403, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ err: 'Un administrator există deja.' }));
+        return;
+      }
+
       const hash = await bcrypt.hash(parola, 10);
       console.log('Hash generat:', hash); // Log pentru hash-ul parolei
-  
-      // Setează rolul implicit ca 'ADMINISTRATOR'
+
       const result = await pool.query(
         'INSERT INTO utilizator (email, nume, parola, rol) VALUES ($1, $2, $3, $4)',
         [email, nume, hash, 'ADMINISTRATOR']
       );
       console.log('Administrator creat cu succes:', result.rows); // Log pentru succesul inserării
-  
+
       res.writeHead(201, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ msg: 'Administrator creat cu succes.' }));
     } catch (err) {
       console.error('Eroare la înregistrare:', err.message); // Log pentru eroare
-  
-      // tratează eroarea dacă emailul este duplicat
-      if (err.code === '23505') { // codul de eroare pentru constrângerea UNIQUE
+
+      if (err.code === '23505') {
         res.writeHead(409, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ err: 'email deja folosit' }));
+        res.end(JSON.stringify({ err: 'Email deja folosit.' }));
       } else {
         res.writeHead(500, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ err: 'eroare la înregistrare' }));
+        res.end(JSON.stringify({ err: 'Eroare internă la înregistrare.' }));
       }
     }
     return;
