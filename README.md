@@ -34,7 +34,7 @@ Resource Planner este o aplicație Web pentru gestiunea și monitorizarea stocur
 
 ![Arhitectură sistem Resource Planner](docs/DF1.png)  
 ![Arhitectură sistem Resource Planner](docs/DF2.png) 
-![Arhitectură sistem Resource Planner](docs/DF3.png) 
+![Arhitectură sistem Resource Planner](docs/DF5.png) 
 ![Arhitectură sistem Resource Planner](docs/DF4.png) 
 *Figura 1. Diagrama arhitecturii de ansamblu (model C4 - context & containere)*
 
