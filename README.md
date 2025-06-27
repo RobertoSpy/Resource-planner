@@ -32,9 +32,10 @@ Resource Planner este o aplicație Web pentru gestiunea și monitorizarea stocur
 
 ## 4. Arhitectura sistemului
 
-![Arhitectură sistem Resource Planner](docs/D1.png)  
-![Arhitectură sistem Resource Planner](docs/D2.png) 
-![Arhitectură sistem Resource Planner](docs/D31.png) 
+![Arhitectură sistem Resource Planner](docs/DF1.png)  
+![Arhitectură sistem Resource Planner](docs/DF2.png) 
+![Arhitectură sistem Resource Planner](docs/DF3.png) 
+![Arhitectură sistem Resource Planner](docs/DF4.png) 
 *Figura 1. Diagrama arhitecturii de ansamblu (model C4 - context & containere)*
 
 Aplicația are o arhitectură tipică client-server: frontend SPA (JS/HTML/CSS), backend Node.js (REST API), bază de date PostgreSQL, email pentru notificări. Backend-ul expune endpointuri REST documentate OpenAPI.
