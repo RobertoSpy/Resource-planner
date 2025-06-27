@@ -34,7 +34,7 @@ const server = http.createServer(async (req, res) => {
   console.log(`Cerere primită: ${req.method} ${req.url}`); // Log pentru fiecare cerere
 
   // Configurare CORS
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8081'); // Permite cererile din frontend
+  res.setHeader('Access-Control-Allow-Origin', 'http://4.210.141.142:8081'); // Permite cererile din frontend
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS'); // Permite metodele HTTP
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization'); // Permite anteturile necesare
 

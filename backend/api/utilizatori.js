@@ -23,7 +23,7 @@ function getUserIdFromToken(req) {
 
 async function getUtilizatori(req, res) {
   try {
-    const result = await pool.query('SELECT * FROM utilizator'); // Modificat: utilizatori -> utilizator
+    const result = await pool.query('SELECT * FROM utilizator'); 
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(result.rows));
   } catch (err) {
@@ -124,7 +124,7 @@ async function updateUtilizator(req, res, id, body) {
   const { nume, rol } = JSON.parse(body);
   try {
     const result = await pool.query(
-      'UPDATE utilizator SET nume = $1, rol = $2 WHERE id = $3 RETURNING *', // Modificat: utilizatori -> utilizator
+      'UPDATE utilizator SET nume = $1, rol = $2 WHERE id = $3 RETURNING *', 
       [nume, rol, id]
     );
     res.writeHead(200, { 'Content-Type': 'application/json' });

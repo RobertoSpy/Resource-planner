@@ -401,7 +401,7 @@ export function setupRouting() {
 
   function logout() {
     localStorage.removeItem('token');
-    navigate('/auth'); // Aici va funcționa, pt. că `navigate` e definit mai sus
+    navigate('/auth'); 
   }
 
   if (!isAuthenticated()) {
