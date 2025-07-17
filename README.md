@@ -1,80 +1,139 @@
 # Resource Planner: Raport de proiect
 
-**Autori:** RobertoSpy,CoceaIustin 
+**Autori:** RobertoSpy, CoceaIustin 
+
 
 ---
 
 ## 1. Introducere
 
-Resource Planner este o aplicație Web pentru gestiunea și monitorizarea stocurilor de produse, dedicată companiilor mici și mijlocii. Oferă funcționalități de administrare a articolelor, categoriilor, utilizatorilor, precum și notificări automate la stoc redus.
+Resource Planner is a web application for managing and monitoring product inventories, dedicated to small and medium-sized companies. It offers features for managing items, categories, users, as well as automatic notifications for low stock.
+---
+
+## 2. Purpose of the Project
+
+The application allows:
+- Authentication based on email/password, roles (administrator/employee)
+- Organization of resources by categories (bulbs, spices, toner, cosmetics, medicines, spare parts, etc.)
+- Dashboard with cheap and almost sold out products
+- Notifying users about stock depletion or the need to check equipment
+- Signaling notifications both in the web interface and by email
+- Export PDF statistics, import CSV stocks
+
 
 ---
 
-## 2. Cerințe funcționale
+## Key Features
 
-- Autentificare pe bază de email/parolă, roluri (administrator/vânzător)
-- CRUD articole și categorii
-- CRUD utilizatori (doar administrator)
-- Notificări automate prin email la stoc redus
-- Export PDF statistici, import CSV stocuri
-- Dashboard cu produse ieftine și aproape epuizate
+- Product and spare parts category management
+- Automatic and on-demand notifications (interface + email)
+- Data import/export (CSV, JSON, XML)
+- Statistics and reports (HTML/PDF)
+- Multi-user (user group, dedicated notifications)
+- CRUD items and categories
+- CRUD users (administrator only)
+
+
+## 3. Non-functional requirements
+
+- Responsive Web Application (HTML5, CSS)
+- Security: JWT, hash suite passwords
+- Portability: Docker, standard SQL databases
+- Open source license for code and content (MIT)
+---
+
+## 4. Usage flow
+
+The user authenticates (as admin or employee), accesses the dashboard, manages products/categories (add, remove, modify, upload product/category files), 
+receives low stock notifications, can export reports to PDF, the administrator manages employees and creates accounts for them.
+
+
+## 5. Screenshots
+
+Feature login
+![Login](docs/login.png) 
+
+Feature Dashboard
+![Dashboard](docs/dashboard.png)  
+
+Feature stock
+![Categories/Products](docs/stock.png) 
+
+Feature users logistic
+![Use](docs/users.png) 
+
+The application has a typical client-server architecture: frontend (JS/HTML/CSS), Node.js backend (REST API), PostgreSQL database, email for notifications. The backend exposes documented OpenAPI REST endpoints.
 
 ---
 
-## 3. Cerințe non-funcționale
+## 6. Data modeling
 
-- Aplicație Web responsive (HTML5, CSS3)
-- Securitate: JWT, parole hash-uite
-- Portabilitate: Docker, baze de date SQL standard
-- Licență liberă pentru cod și conținut (MIT)
+- **item**: id, name, quantity, price, category_id, last_notification
+- **category**: id, name
+- **user**: id, email, name, password (hash), role
+- **notification**: id, item_id, message, sent, notification_date
 
----
-
-## 4. Arhitectura sistemului
-
-![Arhitectură sistem Resource Planner](docs/DF1.png)  
-![Arhitectură sistem Resource Planner](docs/DF2.png) 
-![Arhitectură sistem Resource Planner](docs/DF5.png) 
-![Arhitectură sistem Resource Planner](docs/DF4.png) 
-*Figura 1. Diagrama arhitecturii de ansamblu (model C4 - context & containere)*
-
-Aplicația are o arhitectură tipică client-server: frontend SPA (JS/HTML/CSS), backend Node.js (REST API), bază de date PostgreSQL, email pentru notificări. Backend-ul expune endpointuri REST documentate OpenAPI.
+Data can be quickly imported via CSV.
 
 ---
 
-## 5. Modelarea datelor
+## 7. Design UI
 
-- **articol**: id, nume, cantitate, pret, categorie_id, ultima_notificare
-- **categorie**: id, nume
-- **utilizator**: id, email, nume, parola (hash), rol
-- **notificare**: id, articol_id, mesaj, trimis, data_notificare
+The interface is responsive, minimalist.
+![Mobile](docs/mobile.png) 
 
-Datele pot fi importate rapid via CSV.
 
 ---
 
-## 6. Design UI
+## 8. Stages of development
 
-Interfața este responsive, minimalistă.
-
----
-
-## 7. Flux de utilizare
-
-Utilizatorul se autentifică, accesează dashboard-ul, administrează produse/categorii, primește notificări la stoc redus, poate exporta rapoarte în PDF.
+- UI prototyping & data modeling
+- Frontend implementation 
+- REST backend implementation & notifications
+- Testing, populating with test data
+- OpenAPI documentation and reporting
 
 ---
 
-## 8. Etapele dezvoltării
+## 9. Installation & Running
 
-- Prototipare UI & modelare date
-- Implementare frontend SPA
-- Implementare backend REST & notificări
-- Testare, populare cu date de test
-- Documentație OpenAPI și raport
+### Variant available:
+
+#### 1. **Running locally with Docker (Recommended)**
+1. **Requirement:**  
+   - Instalation [Docker](https://www.docker.com/get-started) on your local sistem  (Windows, Mac, Linux).
+2. **Clone repository-ul:**
+   ```bash
+   git clone https://github.com/RobertoSpy/Resource-planner.git
+   cd Resource-planner
+   ```
+3. **Start the application with Docker Compose:**
+   ```bash
+   docker-compose up --build
+   ```
+   The application will be accessible at `http://localhost:3000` 
+
+4. **Test accounts:**
+- You can create an administrator account and then create employee accounts from the administrator. *ATTENTION: The application will only allow you to have one administrator account, you cannot create multiple administrator accounts.
+
+  #### 2. **Demo (temporarily on Azure)**
+- The application is temporarily hosted on Azure at: 
+  [https://resource-planner.azurewebsites.net](http://4.210.141.142:8081)
+*ATTENTION: Demo hosting will only be available until the end of the project.*
 
 ---
 
-## 9. Concluzii
+### **Import/Export date**
+- Example: Import products from `data/example.csv`
+-Export PDF reports from dashboard
 
-Resource Planner oferă o soluție completă, extensibilă și ușor de folosit pentru gestiunea resurselor și notificarea automată privind stocurile.
+---
+
+### **Assistance**
+For installation or running questions, email directly to [robertoissues@gmail.com](mailto:robertoissues@gmail.com).
+
+---
+
+## 10. Conclusion
+
+Resource Planner offers a complete, extensible, and easy-to-use solution for resource management and automated inventory notification.
