@@ -51,16 +51,16 @@ receives low stock notifications, can export reports to PDF, the administrator m
 ## 5. Screenshots
 
 Feature login
-![Login](docs/login.png) 
+![Login](docs/Login.png) 
 
 Feature Dashboard
-![Dashboard](docs/dashboard.png)  
+![Dashboard](docs/Dashboard.png)  
 
 Feature stock
-![Categories/Products](docs/stock.png) 
+![Categories/Products](docs/Stock.png) 
 
 Feature users logistic
-![Use](docs/users.png) 
+![Use](docs/Users.png) 
 
 The application has a typical client-server architecture: frontend (JS/HTML/CSS), Node.js backend (REST API), PostgreSQL database, email for notifications. The backend exposes documented OpenAPI REST endpoints.
 
@@ -80,7 +80,7 @@ Data can be quickly imported via CSV.
 ## 7. Design UI
 
 The interface is responsive, minimalist.
-![Mobile](docs/mobile.png) 
+![Mobile](docs/Mobile.png) 
 
 
 ---
@@ -131,6 +131,7 @@ The interface is responsive, minimalist.
 
 ### **Assistance**
 For installation or running questions, email directly to [robertoissues@gmail.com](mailto:robertoissues@gmail.com).
+In the docs folder you have an explanatory video in Romanian that shows you how the application works. [docs/video.mp4](docs/video.mp4) (you have to download it raw)
 
 ---
 
